@@ -1,0 +1,29 @@
+{
+    "name": "anon-transfer",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "private": true,
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "install": "lerna bootstrap",
+        "build": "lerna run build",
+        "contracts": "yarn workspace @anon-transfer/contracts run",
+        "frontend": "yarn workspace @anon-transfer/frontend run",
+        "start": "node scripts/start.mjs",
+        "linkUnirep": "sh ./scripts/linkUnirep.sh",
+        "copyUnirep": "sh ./scripts/copyUnirep.sh",
+        "lint": "prettier .",
+        "lint:fix": "prettier . --write",
+        "lint:check": "prettier . --check"
+    },
+    "devDependencies": {
+        "lerna": "^6.0.1",
+        "node-fetch": "^3.3.0"
+    },
+    "dependencies": {
+        "prettier": "^2.8.4"
+    }
+}
