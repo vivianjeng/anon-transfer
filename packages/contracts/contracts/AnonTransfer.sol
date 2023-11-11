@@ -51,8 +51,11 @@ contract AnonTransfer {
         ReputationVerifierHelper.ReputationSignals memory signals = helper.verifyAndCheckCaller(publicSignals, proof);
         uint amount = signals.minRep;
         uint epochKey = signals.epochKey;
+        require(signals.revealNonce == true, "should reveal epoch key nonce");
+        require(signals.nonce == 0, "should set epoch key nonce to 0");
         require(signals.proveMinRep == true, "should prove minimum rep");
         require(withdrawnEpochKey[epochKey] == false, "withdraw is only allowed once per epoch");
+        require(signals.data == uint(uint160(address(recipient))), "should specific recipient");
         recipient.transfer(amount);
         unirep.attest(epochKey, signals.epoch, withdrawIndex, amount);
         withdrawnEpochKey[epochKey] = true;

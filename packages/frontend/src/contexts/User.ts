@@ -117,7 +117,7 @@ class User {
         console.log(receipt)
     }
 
-    async withdraw(receipiant: string, amount: string) {
+    async withdraw(recipient: string, amount: string) {
         const provider = new ethers.providers.Web3Provider(
             (window as any).ethereum
         )
@@ -125,11 +125,14 @@ class User {
         await this.userState?.waitForSync()
         const reputationProof = await this.userState?.genProveReputationProof({
             minRep: Number(amount),
+            revealNonce: true,
+            epkNonce: 0,
+            data: recipient,
         })
         const tx = await this.app
             ?.connect(signer)
             .withdraw(
-                receipiant,
+                recipient,
                 reputationProof?.publicSignals,
                 reputationProof?.proof
             )

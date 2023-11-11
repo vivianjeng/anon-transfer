@@ -104,8 +104,16 @@ describe('Anon Transfer', function () {
         expect(balance0.toString()).to.equal('0')
         const userState = await genUserState(id, app)
         const withdrawAmount = 200000
+        const revealNonce = true
+        const epkNonce = 0
+        const sigData = wallet.address
         const { publicSignals, proof } =
-            await userState.genProveReputationProof({ minRep: withdrawAmount })
+            await userState.genProveReputationProof({
+                minRep: withdrawAmount,
+                revealNonce,
+                epkNonce,
+                data: sigData,
+            })
         await app.withdraw(wallet.address, publicSignals, proof)
         const balance1 = await ethers.provider.getBalance(wallet.address)
         expect(balance1.toString()).to.equal(withdrawAmount.toString())
