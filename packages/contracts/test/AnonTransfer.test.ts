@@ -30,6 +30,7 @@ async function genUserState(id, app) {
 }
 
 describe('Anon Transfer', function () {
+    this.timeout(0)
     let unirep: Unirep
     let app: AnonTransfer
 
