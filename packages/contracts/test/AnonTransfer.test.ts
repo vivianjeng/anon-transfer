@@ -2,22 +2,19 @@
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
 import { deployUnirep, deployVerifierHelper } from '@unirep/contracts/deploy'
-import { schema, UserState } from '@unirep/core'
-import { SQLiteConnector } from 'anondb/node'
+import { UserState } from '@unirep/core'
 import { Circuit } from '@unirep/circuits'
 import { defaultProver as prover } from '@unirep/circuits/provers/defaultProver'
+import { Unirep } from '@unirep/contracts/typechain'
 import { Identity } from '@semaphore-protocol/identity'
 
 import { AnonTransfer } from '../typechain-types'
-import { Unirep } from '@unirep/contracts/typechain'
 
-async function genUserState(id, app) {
+async function genUserState(id: Identity, app: AnonTransfer) {
     // generate a user state
-    const db = await SQLiteConnector.create(schema, ':memory:')
     const unirepAddress = await app.unirep()
     const attesterId = BigInt(app.address)
     const userState = new UserState({
-        db,
         prover,
         unirepAddress,
         provider: ethers.provider,
@@ -38,6 +35,8 @@ describe('Anon Transfer', function () {
     const epochLength = 300
     // generate random user id
     const id = new Identity()
+    // user balance
+    let balance = 0
 
     it('deployment', async function () {
         const [signer] = await ethers.getSigners()
@@ -71,13 +70,25 @@ describe('Anon Transfer', function () {
             const epoch = 0
             const nonce = i
             const wei = 100000 + i * 3000
-            const epochKey = userState.getEpochKeys(epoch, nonce, app.address)
+            const epochKey = userState.getEpochKeys(
+                epoch,
+                nonce,
+                app.address
+            ) as bigint
             await app
                 .connect(sender)
-                .transfer(epochKey as bigint, epoch, { value: wei })
+                .transfer(epochKey, epoch, { value: wei })
                 .then((t) => t.wait())
             console.log(`sender of the transaction: ${sender.address}`)
             console.log(`transfer ${wei} Wei to private address ${epochKey}`)
+
+            // check user balance
+            balance += wei
+            await userState.waitForSync()
+            const data = await userState.getData()
+            expect(data[0].toString()).to.equal(balance.toString())
+            console.log('user 1 balance:', balance)
+            userState.stop()
             console.log('-----------------------------------------------')
         }
     })
@@ -120,5 +131,91 @@ describe('Anon Transfer', function () {
         console.log(
             `withdraw amount ${withdrawAmount} Wei to wallet with address ${wallet.address}`
         )
+
+        // check user balance
+        balance -= withdrawAmount
+        await userState.waitForSync()
+        const data = await userState.getData()
+        expect((data[0] - data[1]).toString()).to.equal(balance.toString())
+        console.log('user 1 balance:', balance)
+        userState.stop()
+    })
+
+    it('cannot withdraw twice in the same epoch', async () => {
+        const wallet = ethers.Wallet.createRandom()
+        const balance0 = await ethers.provider.getBalance(wallet.address)
+        expect(balance0.toString()).to.equal('0')
+        const userState = await genUserState(id, app)
+        const withdrawAmount = 200000
+        const revealNonce = true
+        const epkNonce = 0
+        const sigData = wallet.address
+        const { publicSignals, proof } =
+            await userState.genProveReputationProof({
+                minRep: withdrawAmount,
+                revealNonce,
+                epkNonce,
+                data: sigData,
+            })
+        await expect(
+            app
+                .withdraw(wallet.address, publicSignals, proof)
+                .then((t) => t.wait())
+        ).to.be.revertedWith('withdraw is only allowed once per epoch')
+        userState.stop()
+    })
+
+    it('cannot withdraw the amount more than balance', async () => {
+        // user state transition
+        await ethers.provider.send('evm_increaseTime', [epochLength])
+        await ethers.provider.send('evm_mine', [])
+
+        const newEpoch = await unirep.attesterCurrentEpoch(app.address)
+        const userState = await genUserState(id, app)
+        {
+            const { publicSignals, proof } =
+                await userState.genUserStateTransitionProof({
+                    toEpoch: newEpoch,
+                })
+            await unirep
+                .userStateTransition(publicSignals, proof)
+                .then((t) => t.wait())
+        }
+
+        const wallet = ethers.Wallet.createRandom()
+        const balance0 = await ethers.provider.getBalance(wallet.address)
+        expect(balance0.toString()).to.equal('0')
+        const revealNonce = true
+        const epkNonce = 0
+        const sigData = wallet.address
+        await userState.waitForSync()
+
+        // check balance
+        const data = await userState.getProvableData()
+        const minRep = data[0] - data[1]
+        expect(minRep.toString()).to.equal(balance.toString())
+        console.log('user 1 balance:', balance)
+
+        // success
+        await userState.genProveReputationProof({
+            minRep: Number(minRep),
+            revealNonce,
+            epkNonce,
+            data: sigData,
+        })
+
+        // fail
+        await new Promise<void>((rs, rj) => {
+            userState
+                .genProveReputationProof({
+                    minRep: Number(minRep) + 1,
+                    revealNonce,
+                    epkNonce,
+                    data: sigData,
+                })
+                .then(() => rj())
+                .catch(() => rs())
+        })
+        userState.stop()
     })
 })

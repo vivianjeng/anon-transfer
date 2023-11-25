@@ -1,5 +1,6 @@
 import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
+import '@nomicfoundation/hardhat-chai-matchers'
 
 export default {
     defaultNetwork: 'local',
