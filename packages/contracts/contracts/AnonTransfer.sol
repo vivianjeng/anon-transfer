@@ -37,9 +37,9 @@ contract AnonTransfer {
     }
 
     function transfer(
-        uint epochKey,
-        uint48 epoch
+        uint epochKey
     ) public payable{
+        uint48 epoch = unirep.attesterCurrentEpoch(uint160(address(this)));
         unirep.attest(epochKey, epoch, depositIndex, msg.value);
     }
 
