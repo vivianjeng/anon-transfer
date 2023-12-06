@@ -8,35 +8,30 @@ import prover from '@unirep/circuits/provers/web'
 import { UserState } from '@unirep/core'
 import { ethers } from 'ethers'
 import abi from '@unirep/contracts/abi/Unirep.json'
+import { useGlobalContext } from '@/contexts/User'
 
 const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
-const address = '0x9A676e781A523b5d0C0e43731313A708CB607508'
+const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
 // const chainId = 11155111
 const chainId = 1337
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const unirep = new ethers.Contract(unirepAddress, abi, provider)
 
 export type AddressListProps = {
-    from: string
-    semaphoreIdentity: string
     epoch: number
 }
 
-export default function AddressList({
-    from,
-    semaphoreIdentity,
-    epoch,
-}: AddressListProps) {
+export default function AddressList({ epoch }: AddressListProps) {
+    const { userId, setUserId, address } = useGlobalContext()
     const [transitionEpoch, setTransitionEpoch] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
-    const identity = new Identity(semaphoreIdentity)
     const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const id = new Identity(semaphoreIdentity)
+    const id = new Identity(userId)
     const userState = new UserState({
         id: id,
         prover: prover,
         provider: provider,
-        attesterId: BigInt(address),
+        attesterId: BigInt(appAddress),
         unirepAddress: unirepAddress,
     })
     const epochKeys = new Array(3)
@@ -44,20 +39,15 @@ export default function AddressList({
         .map(
             (_, i) =>
                 '0x' +
-                genEpochKey(
-                    identity.secret,
-                    address,
-                    epoch,
-                    i,
-                    chainId
-                ).toString(16)
+                genEpochKey(id.secret, appAddress, epoch, i, chainId).toString(
+                    16
+                )
         )
 
     const getData = async () => {
         try {
             await userState.start()
             await userState.waitForSync()
-            console.log(await userState.latestTransitionedEpoch())
             return userState.latestTransitionedEpoch()
         } catch (err: any) {
             window.alert(err.message)
@@ -69,8 +59,6 @@ export default function AddressList({
         try {
             await userState.start()
             await userState.waitForSync()
-            console.log(await userState.latestTransitionedEpoch())
-            console.log('finish syncing')
             const { publicSignals, proof, toEpoch } =
                 await userState.genUserStateTransitionProof()
             const data = unirep.interface.encodeFunctionData(
@@ -81,7 +69,7 @@ export default function AddressList({
                 method: 'eth_sendTransaction',
                 params: [
                     {
-                        from: from,
+                        from: address,
                         to: unirepAddress,
                         data: data,
                     },
@@ -97,7 +85,6 @@ export default function AddressList({
 
     useEffect(() => {
         getData().then((res) => {
-            console.log(res, epoch)
             setTransitionEpoch(res || 0)
         })
     }, [])

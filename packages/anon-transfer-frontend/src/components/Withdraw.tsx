@@ -7,19 +7,17 @@ import prover from '@unirep/circuits/provers/web'
 import { SetStateAction, useEffect, useState } from 'react'
 import unirepAbi from '@unirep/contracts/abi/Unirep.json'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
+import { useGlobalContext } from '@/contexts/User'
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 
 const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
-const address = '0x9A676e781A523b5d0C0e43731313A708CB607508'
+const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
 const unirep = new ethers.Contract(unirepAddress, unirepAbi, provider)
-const app = new ethers.Contract(address, abi, provider)
+const app = new ethers.Contract(appAddress, abi, provider)
 
-export type WithdrawProps = {
-    semaphoreIdentity: string
-    from: string
-}
 
-export default function Withdraw({ semaphoreIdentity, from }: WithdrawProps) {
+export default function Withdraw() {
+    const { userId, setUserId, address, setAddress,} = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [data, setData] = useState('')
     const [privateAddress, setPrivateAddress] = useState('')
@@ -35,12 +33,12 @@ export default function Withdraw({ semaphoreIdentity, from }: WithdrawProps) {
         setIsLoading(true)
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum)
-            const id = new Identity(semaphoreIdentity)
+            const id = new Identity(userId)
             const userState = new UserState({
                 id: id,
                 prover: prover,
                 provider: provider,
-                attesterId: BigInt(address),
+                attesterId: BigInt(appAddress),
                 unirepAddress: unirepAddress,
             })
             await userState.start()
@@ -60,7 +58,7 @@ export default function Withdraw({ semaphoreIdentity, from }: WithdrawProps) {
                     method: 'eth_sendTransaction',
                     params: [
                         {
-                            from: from,
+                            from: address,
                             to: unirepAddress,
                             data: data,
                         },
@@ -69,7 +67,7 @@ export default function Withdraw({ semaphoreIdentity, from }: WithdrawProps) {
             }
             const revealNonce = true
             const epkNonce = 0
-            const sigData = from
+            const sigData = address
             const { publicSignals, proof } =
                 await userState.genProveReputationProof({
                     minRep: Number(value),
@@ -86,8 +84,8 @@ export default function Withdraw({ semaphoreIdentity, from }: WithdrawProps) {
                 method: 'eth_sendTransaction',
                 params: [
                     {
-                        from: from,
-                        to: address,
+                        from: address,
+                        to: appAddress,
                         data: data,
                     },
                 ],
@@ -104,12 +102,12 @@ export default function Withdraw({ semaphoreIdentity, from }: WithdrawProps) {
     const getData = async () => {
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum)
-            const id = new Identity(semaphoreIdentity)
+            const id = new Identity(userId)
             const userState = new UserState({
                 id: id,
                 prover: prover,
                 provider: provider,
-                attesterId: BigInt(address),
+                attesterId: BigInt(appAddress),
                 unirepAddress: unirepAddress,
             })
             await userState.start()

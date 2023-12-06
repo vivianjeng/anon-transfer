@@ -3,13 +3,12 @@ import { Text, Button, HStack, Spacer, VStack } from '@chakra-ui/react'
 import React from 'react'
 
 import { useEffect } from 'react'
-import CopyAddress from './CopyAddress'
-import { Identity } from '@semaphore-protocol/identity'
 import AddressList from './AddressList'
 import Transfer from './Transfer'
 import Withdraw from './Withdraw'
 import Signup from './Signup'
 import { ethers } from 'ethers'
+import { useGlobalContext } from '@/contexts/User'
 
 declare global {
     interface Window {
@@ -38,12 +37,11 @@ function remainingTime() {
 }
 
 export default function Wallet() {
-    const [walletAddress, setWalletAddress] = React.useState('')
-    const [semaphoreIdentity, setSemaphoreIdentity] = React.useState('' as any)
+    const { userId, setUserId, address, setAddress } = useGlobalContext()
     const [epoch, setEpoch] = React.useState(0)
     const [remaining, setRemaining] = React.useState(0)
-    
-    window.ethereum.on('accountsChanged', handleAccountsChanged);
+
+    window.ethereum.on('accountsChanged', handleAccountsChanged)
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -66,23 +64,23 @@ export default function Wallet() {
     }
     function handleAccountsChanged(accounts: string | any[]) {
         if (accounts.length === 0) {
-          console.log('Please connect to MetaMask.');
+            console.log('Please connect to MetaMask.')
         } else {
-            setWalletAddress(accounts[0])
+            setAddress(accounts[0])
         }
-      }
+    }
 
     const connectWallet = async () => {
         if (window.ethereum) {
             const accounts = await window.ethereum.request({
-                method: 'eth_accounts'
+                method: 'eth_accounts',
             })
-            if(accounts.length !== 0) {
-                setWalletAddress(accounts[0])
+            if (accounts.length !== 0) {
+                setAddress(accounts[0])
                 const signature = await signMessage()
-                setSemaphoreIdentity(signature)
+                setUserId(signature || '')
             }
-            
+
             try {
                 const addressArray = await window.ethereum.request({
                     method: 'eth_requestAccounts',
@@ -91,9 +89,9 @@ export default function Wallet() {
                     status: '👆🏽 Write a message in the text-field above.',
                     address: addressArray[0],
                 }
-                setWalletAddress(obj.address)
+                setAddress(obj.address)
                 const signature = await signMessage()
-                setSemaphoreIdentity(signature)
+                setUserId(signature || '')
             } catch (err: any) {
                 return {
                     address: '',
@@ -115,11 +113,8 @@ export default function Wallet() {
                     Anon Transfer
                 </Text>
                 <Spacer width="5rem"></Spacer>
-                {walletAddress !== '' ? (
-                    <Signup
-                    from={walletAddress}
-                    semaphoreIdentity={semaphoreIdentity}
-                />
+                {address !== '' ? (
+                    <Signup  />
                 ) : (
                     <Button
                         onClick={connectWallet}
@@ -130,22 +125,14 @@ export default function Wallet() {
                     </Button>
                 )}
             </HStack>
-            <HStack w="full" >
+            <HStack w="full">
                 <Text>Epoch: {epoch}</Text>
                 <Spacer width="5rem"></Spacer>
-                <Text >Epoch remaining time: {remaining}</Text>
+                <Text>Epoch remaining time: {remaining}</Text>
             </HStack>
-            {semaphoreIdentity && (
-                <AddressList
-                    from={walletAddress}
-                    semaphoreIdentity={semaphoreIdentity}
-                    epoch={epoch}
-                />
-            )}
-            {semaphoreIdentity && <Transfer from={walletAddress} />}
-            {semaphoreIdentity && (
-                <Withdraw semaphoreIdentity={semaphoreIdentity} from={walletAddress} />
-            )}
+            {userId && <AddressList epoch={epoch} />}
+            {userId && <Transfer />}
+            {userId && <Withdraw />}
         </VStack>
     )
 }

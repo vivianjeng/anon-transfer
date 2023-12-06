@@ -3,12 +3,11 @@ import { ethers } from 'ethers'
 import { Button, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import { SetStateAction, useState } from 'react'
+import { useGlobalContext } from '@/contexts/User'
 
-export type TransferProps = {
-    from: string
-}
 
-export default function Transfer({ from }: TransferProps) {
+export default function Transfer() {
+    const { userId, setUserId, address, setAddress,} = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [privateAddress, setPrivateAddress] = useState('')
     const [value, setValue] = useState('')
@@ -21,8 +20,8 @@ export default function Transfer({ from }: TransferProps) {
     const transfer = async (): Promise<void> => {
         setIsLoading(true)
         try {
-            const address = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
-            const app = new ethers.Contract(address, abi)
+            const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
+            const app = new ethers.Contract(appAddress, abi)
             const data = app.interface.encodeFunctionData('transfer', [
                 privateAddress,
             ])
@@ -31,8 +30,8 @@ export default function Transfer({ from }: TransferProps) {
                 method: 'eth_sendTransaction',
                 params: [
                     {
-                        from: from,
-                        to: address,
+                        from: address,
+                        to: appAddress,
                         value: hexValue,
                         data: data,
                     },
