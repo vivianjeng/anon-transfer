@@ -1,12 +1,12 @@
 'use client'
 import { Text, Box, HStack, Spacer, VStack } from '@chakra-ui/react'
+import { TimeIcon } from '@chakra-ui/icons'
 import React from 'react'
 
 import { useEffect } from 'react'
 import AddressList from './AddressList'
 import Transfer from './Transfer'
 import Withdraw from './Withdraw'
-import Signup from './Signup'
 import { ethers } from 'ethers'
 import { culcEpoch, remainingTime, useGlobalContext } from '@/contexts/User'
 
@@ -16,9 +16,6 @@ declare global {
     }
 }
 
-// const address = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
-const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
-const address = '0x9A676e781A523b5d0C0e43731313A708CB607508'
 const message = 'Sign up for Anon Transfer'
 
 export default function Wallet() {
@@ -97,6 +94,7 @@ export default function Wallet() {
             <HStack w="full">
                 <Text>Epoch: {epoch}</Text>
                 <Spacer width="5rem"></Spacer>
+                <TimeIcon />
                 <Text>Epoch remaining time: {remaining}</Text>
             </HStack>
             <AddressList />

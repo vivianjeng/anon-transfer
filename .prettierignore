@@ -4,3 +4,4 @@
 **/typechain-types
 **/.next
 **/node_modules
+**/out

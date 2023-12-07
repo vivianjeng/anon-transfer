@@ -1,9 +1,10 @@
 'use client'
 import { ethers } from 'ethers'
 import { Button, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { ArrowForwardIcon } from '@chakra-ui/icons'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import { SetStateAction, useState } from 'react'
-import { useGlobalContext } from '@/contexts/User'
+import { appAddress, useGlobalContext } from '@/contexts/User'
 import CardComponent from './Card'
 
 declare global {
@@ -26,7 +27,6 @@ export default function Transfer() {
     const transfer = async (): Promise<void> => {
         setIsLoading(true)
         try {
-            const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
             const app = new ethers.Contract(appAddress, abi)
             const data = app.interface.encodeFunctionData('transfer', [
                 privateAddress,
@@ -84,7 +84,12 @@ export default function Transfer() {
                     textColor="black"
                 />
             </HStack>
-            <Button colorScheme="blue" onClick={transfer} isLoading={isLoading}>
+            <Button
+                colorScheme="blue"
+                onClick={transfer}
+                isLoading={isLoading}
+                rightIcon={<ArrowForwardIcon />}
+            >
                 Transfer
             </Button>
         </CardComponent>

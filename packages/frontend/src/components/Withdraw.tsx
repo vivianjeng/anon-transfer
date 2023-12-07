@@ -8,6 +8,7 @@ import {
     Text,
     VStack,
 } from '@chakra-ui/react'
+import { UnlockIcon } from '@chakra-ui/icons'
 const { Identity } = require('@semaphore-protocol/identity')
 import { ethers } from 'ethers'
 import { UserState } from '@unirep/core'
@@ -15,7 +16,7 @@ import prover from '@unirep/circuits/provers/web'
 import { SetStateAction, useEffect, useState } from 'react'
 import unirepAbi from '@unirep/contracts/abi/Unirep.json'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
-import { useGlobalContext } from '@/contexts/User'
+import { useGlobalContext, unirepAddress, appAddress } from '@/contexts/User'
 import CardComponent from './Card'
 
 declare global {
@@ -23,10 +24,6 @@ declare global {
         ethereum?: any
     }
 }
-
-const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
-// const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
-const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
 
 export default function Withdraw() {
     const { address, setAddress } = useGlobalContext()
@@ -53,8 +50,7 @@ export default function Withdraw() {
                 provider
             )
             const app = new ethers.Contract(appAddress, abi, provider)
-            if (window.localStorage.getItem('userId') === null)
-                throw new Error('user has not signed up')
+            if (!window.localStorage.getItem('userId')) return
             const id = new Identity(window.localStorage.getItem('userId'))
             const userState = new UserState({
                 id: id,
@@ -131,8 +127,7 @@ export default function Withdraw() {
                 setAddress(accounts[0])
             }
             const provider = new ethers.providers.Web3Provider(window.ethereum)
-            if (window.localStorage.getItem('userId') === null)
-                throw new Error('user has not signed up')
+            if (!window.localStorage.getItem('userId')) return
             const id = new Identity(window.localStorage.getItem('userId'))
             const userState = new UserState({
                 id: id,
@@ -186,7 +181,12 @@ export default function Withdraw() {
                     textColor="black"
                 />
             </HStack>
-            <Button colorScheme="blue" onClick={withdraw} isLoading={isLoading}>
+            <Button
+                colorScheme="blue"
+                onClick={withdraw}
+                isLoading={isLoading}
+                rightIcon={<UnlockIcon />}
+            >
                 Withdraw
             </Button>
         </CardComponent>
