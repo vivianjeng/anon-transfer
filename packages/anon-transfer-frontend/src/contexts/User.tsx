@@ -26,8 +26,8 @@ const GlobalContext = createContext<ContextProps>({
     setEpoch: (): number => 0,
 })
 
-// const startTimestamp = 1701792432
-const startTimestamp = 1701806259
+const startTimestamp = 1701792432
+// const startTimestamp = 1701806259
 const epochLength = 300
 
 export function culcEpoch() {
