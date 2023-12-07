@@ -149,7 +149,7 @@ export default function AddressList() {
                     key={index}
                     address={address}
                     disabled={epoch !== transitionEpoch}
-                    w="42rem"
+                    w="full"
                 />
             ))}
             <Button

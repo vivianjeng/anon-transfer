@@ -51,6 +51,22 @@ export default function Signup() {
             window.localStorage.setItem('userId', email + password)
         }
     })
+
+    const signin = async () => {
+        setIsLoading(true)
+        try {
+            const secret = email + password
+            window.localStorage.setItem('email', email)
+            window.localStorage.setItem('password', password)
+            window.localStorage.setItem('userId', secret)
+            setIsDisabled(true)
+        } catch (err: any) {
+            window.alert(err.message)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     const signup = async () => {
         setIsLoading(true)
         try {
@@ -135,6 +151,19 @@ export default function Signup() {
                 </InputRightElement>
             </InputGroup>
             <Button
+                onClick={signin}
+                isLoading={isLoading}
+                isDisabled={isDisabled}
+            >
+                <Tooltip
+                    placement="auto"
+                    label="You already signed in."
+                    isDisabled={!isDisabled}
+                >
+                    Sign In
+                </Tooltip>
+            </Button>
+            <Button
                 colorScheme="blue"
                 onClick={signup}
                 isLoading={isLoading}
@@ -142,10 +171,10 @@ export default function Signup() {
             >
                 <Tooltip
                     placement="auto"
-                    label="You already signed up."
+                    label="You already signed in."
                     isDisabled={!isDisabled}
                 >
-                    Signup
+                    Sign Up
                 </Tooltip>
             </Button>
         </HStack>

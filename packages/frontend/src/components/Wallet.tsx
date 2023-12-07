@@ -93,7 +93,7 @@ export default function Wallet() {
     }
 
     return (
-        <VStack>
+        <VStack w="80%">
             <HStack w="full">
                 <Text>Epoch: {epoch}</Text>
                 <Spacer width="5rem"></Spacer>

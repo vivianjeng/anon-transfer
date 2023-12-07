@@ -21,7 +21,7 @@ export default function Home() {
     return (
         <ChakraProvider theme={theme}>
             <Header />
-            <VStack p={10} pt={3} gap={5} w="full">
+            <VStack p={10} pt={3} gap={5}>
                 <Wallet />
                 <Footer />
             </VStack>

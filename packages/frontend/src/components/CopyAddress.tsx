@@ -39,12 +39,11 @@ export default function CopyAddress({
     }
 
     return (
-        <HStack>
+        <HStack w="full">
             <Input
                 value={address}
                 placeholder={address}
                 content={address}
-                w="42rem"
                 cursor={'text'}
                 textColor="black"
                 bgColor="white"
