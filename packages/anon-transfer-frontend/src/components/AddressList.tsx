@@ -9,6 +9,7 @@ import { UserState } from '@unirep/core'
 import { ethers } from 'ethers'
 import abi from '@unirep/contracts/abi/Unirep.json'
 import { useGlobalContext } from '@/contexts/User'
+import CardComponent from './Card'
 
 const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
 const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
@@ -17,12 +18,8 @@ const chainId = 1337
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const unirep = new ethers.Contract(unirepAddress, abi, provider)
 
-export type AddressListProps = {
-    epoch: number
-}
-
-export default function AddressList({ epoch }: AddressListProps) {
-    const { userId, setUserId, address } = useGlobalContext()
+export default function AddressList() {
+    const { userId, setUserId, address, epoch, setEpoch } = useGlobalContext()
     const [transitionEpoch, setTransitionEpoch] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
     const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -90,7 +87,7 @@ export default function AddressList({ epoch }: AddressListProps) {
     }, [])
 
     return (
-        <VStack bgColor="#f0f9ff" pl="20" pr="20" pt="8" pb="8" w="full">
+        <CardComponent>
             <Text fontSize="2xl" w="full">
                 My private addresses:
             </Text>
@@ -103,12 +100,12 @@ export default function AddressList({ epoch }: AddressListProps) {
                 />
             ))}
             <Button
-                bgColor="skyblue"
+                colorScheme="blue"
                 onClick={transition}
                 isLoading={isLoading}
             >
                 Transition
             </Button>
-        </VStack>
+        </CardComponent>
     )
 }

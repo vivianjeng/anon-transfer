@@ -1,5 +1,13 @@
 'use client'
-import { Button, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import {
+    Button,
+    Center,
+    Flex,
+    HStack,
+    Input,
+    Text,
+    VStack,
+} from '@chakra-ui/react'
 import { Identity } from '@semaphore-protocol/identity'
 import { ethers } from 'ethers'
 import { UserState } from '@unirep/core'
@@ -8,6 +16,7 @@ import { SetStateAction, useEffect, useState } from 'react'
 import unirepAbi from '@unirep/contracts/abi/Unirep.json'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import { useGlobalContext } from '@/contexts/User'
+import CardComponent from './Card'
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 
 const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
@@ -15,13 +24,14 @@ const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
 const unirep = new ethers.Contract(unirepAddress, unirepAbi, provider)
 const app = new ethers.Contract(appAddress, abi, provider)
 
-
 export default function Withdraw() {
-    const { userId, setUserId, address, setAddress,} = useGlobalContext()
+    const { userId, setUserId, address, setAddress } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [data, setData] = useState('')
     const [privateAddress, setPrivateAddress] = useState('')
     const [value, setValue] = useState('')
+    // TODO: getData to compute balance
+    const [balance, setBalance] = useState('0')
     const handlePrivateAddressChange = (event: {
         target: { value: SetStateAction<string> }
     }) => setPrivateAddress(event.target.value)
@@ -125,34 +135,36 @@ export default function Withdraw() {
     }, [])
 
     return (
-        <VStack bgColor="#f0f9ff" pl="20" pr="20" pt="8" pb="8" w="full">
+        <CardComponent>
             <Text fontSize="2xl" w="full">
                 Withdraw
             </Text>
-            <Text>Pending balance: {data}</Text>
+            <Text w="full">Pending balance: {balance} wei</Text>
             <HStack w="full">
-                <Text>Input an ETH address: </Text>
+                <Text w="250px">Input an ETH address:</Text>
                 <Input
                     value={privateAddress}
                     onChange={handlePrivateAddressChange}
                     placeholder="0x1234..."
-                    w="42rem"
+                    w="full"
                     bgColor="white"
+                    textColor="black"
                 />
             </HStack>
             <HStack w="full">
-                <Text>Input the amount of wei: </Text>
+                <Text w="250px">Input the amount of wei: </Text>
                 <Input
                     value={value}
                     onChange={handleValueChange}
                     placeholder="123..."
-                    w="42rem"
+                    w="full"
                     bgColor="white"
+                    textColor="black"
                 />
             </HStack>
-            <Button bgColor="skyblue" onClick={withdraw} isLoading={isLoading}>
+            <Button colorScheme="blue" onClick={withdraw} isLoading={isLoading}>
                 Withdraw
             </Button>
-        </VStack>
+        </CardComponent>
     )
 }

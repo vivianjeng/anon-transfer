@@ -1,13 +1,13 @@
 'use client'
 import { ethers } from 'ethers'
-import { Button, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { Button, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import { SetStateAction, useState } from 'react'
 import { useGlobalContext } from '@/contexts/User'
-
+import CardComponent from './Card'
 
 export default function Transfer() {
-    const { userId, setUserId, address, setAddress,} = useGlobalContext()
+    const { userId, setUserId, address, setAddress } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [privateAddress, setPrivateAddress] = useState('')
     const [value, setValue] = useState('')
@@ -46,33 +46,35 @@ export default function Transfer() {
         }
     }
     return (
-        <VStack bgColor="#f0f9ff" pl="20" pr="20" pt="8" pb="8" w="full">
+        <CardComponent>
             <Text fontSize="2xl" w="full">
                 Transfer
             </Text>
             <HStack w="full">
-                <Text>Input an private address: </Text>
+                <Text w="250px">Input an private address: </Text>
                 <Input
                     value={privateAddress}
                     onChange={handlePrivateAddressChange}
                     placeholder="0x1234..."
-                    w="42rem"
+                    w="full"
+                    textColor="black"
                     bgColor="white"
                 />
             </HStack>
             <HStack w="full">
-                <Text>Input the amount of wei: </Text>
+                <Text w="250px">Input the amount of wei: </Text>
                 <Input
                     value={value}
                     onChange={handleValueChange}
                     placeholder="123..."
-                    w="42rem"
+                    w="full"
                     bgColor="white"
+                    textColor="black"
                 />
             </HStack>
-            <Button bgColor="skyblue" onClick={transfer} isLoading={isLoading}>
+            <Button colorScheme="blue" onClick={transfer} isLoading={isLoading}>
                 Transfer
             </Button>
-        </VStack>
+        </CardComponent>
     )
 }

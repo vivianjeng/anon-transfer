@@ -8,7 +8,7 @@ import Transfer from './Transfer'
 import Withdraw from './Withdraw'
 import Signup from './Signup'
 import { ethers } from 'ethers'
-import { useGlobalContext } from '@/contexts/User'
+import { culcEpoch, remainingTime, useGlobalContext } from '@/contexts/User'
 
 declare global {
     interface Window {
@@ -20,25 +20,10 @@ declare global {
 const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
 const address = '0x9A676e781A523b5d0C0e43731313A708CB607508'
 const message = 'Sign up for Anon Transfer'
-// const startTimestamp = 1701792432
-const startTimestamp = 1701806259
-const epochLength = 300
-
-function culcEpoch() {
-    const timestamp = Math.floor(+new Date() / 1000)
-    return Math.max(0, Math.floor((timestamp - startTimestamp) / epochLength))
-}
-
-function remainingTime() {
-    const timestamp = Math.floor(+new Date() / 1000)
-    const currentEpoch = culcEpoch()
-    const epochEnd = startTimestamp + (currentEpoch + 1) * epochLength
-    return Math.max(0, epochEnd - timestamp)
-}
 
 export default function Wallet() {
-    const { userId, setUserId, address, setAddress } = useGlobalContext()
-    const [epoch, setEpoch] = React.useState(0)
+    const { userId, setUserId, address, setAddress, epoch, setEpoch } =
+        useGlobalContext()
     const [remaining, setRemaining] = React.useState(0)
 
     window.ethereum.on('accountsChanged', handleAccountsChanged)
@@ -107,32 +92,25 @@ export default function Wallet() {
     }
 
     return (
-        <VStack w="full">
+        <VStack>
             <HStack w="full">
                 <Text textAlign="left" fontSize={20}>
                     Anon Transfer
                 </Text>
-                <Spacer width="5rem"></Spacer>
-                {address !== '' ? (
-                    <Signup  />
-                ) : (
-                    <Button
-                        onClick={connectWallet}
-                        bgColor="skyblue"
-                        minWidth={50}
-                    >
-                        Connect
-                    </Button>
-                )}
+                <Spacer width="auto"></Spacer>
+                <Signup />
             </HStack>
             <HStack w="full">
                 <Text>Epoch: {epoch}</Text>
                 <Spacer width="5rem"></Spacer>
                 <Text>Epoch remaining time: {remaining}</Text>
             </HStack>
-            {userId && <AddressList epoch={epoch} />}
+            <AddressList />
+            <Transfer />
+            <Withdraw />
+            {/* {userId && <AddressList epoch={epoch} />}
             {userId && <Transfer />}
-            {userId && <Withdraw />}
+            {userId && <Withdraw />} */}
         </VStack>
     )
 }
