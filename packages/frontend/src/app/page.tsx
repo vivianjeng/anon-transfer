@@ -1,7 +1,14 @@
 'use client'
 import Footer from '@/components/Footer'
+import Header from '@/components/Header'
 import Wallet from '@/components/Wallet'
 import { ChakraProvider, VStack, extendTheme } from '@chakra-ui/react'
+
+declare global {
+    interface Window {
+        ethereum?: any
+    }
+}
 
 const theme = extendTheme({
     config: {
@@ -13,12 +20,11 @@ const theme = extendTheme({
 export default function Home() {
     return (
         <ChakraProvider theme={theme}>
-            <main className="flex min-h-screen flex-col items-center justify-between p-10 w-fill">
-                <VStack gap={5} w="full">
-                    <Wallet />
-                    <Footer />
-                </VStack>
-            </main>
+            <Header />
+            <VStack p={10} pt={3} gap={5} w="full">
+                <Wallet />
+                <Footer />
+            </VStack>
         </ChakraProvider>
     )
 }

@@ -8,7 +8,7 @@ import {
     Text,
     VStack,
 } from '@chakra-ui/react'
-import { Identity } from '@semaphore-protocol/identity'
+const { Identity } = require('@semaphore-protocol/identity')
 import { ethers } from 'ethers'
 import { UserState } from '@unirep/core'
 import prover from '@unirep/circuits/provers/web'
@@ -17,24 +17,28 @@ import unirepAbi from '@unirep/contracts/abi/Unirep.json'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import { useGlobalContext } from '@/contexts/User'
 import CardComponent from './Card'
-const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+declare global {
+    interface Window {
+        ethereum?: any
+    }
+}
 
 const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
-const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
-const unirep = new ethers.Contract(unirepAddress, unirepAbi, provider)
-const app = new ethers.Contract(appAddress, abi, provider)
+// const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
+const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
 
 export default function Withdraw() {
-    const { userId, setUserId, address, setAddress } = useGlobalContext()
+    const { address, setAddress } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [data, setData] = useState('')
-    const [privateAddress, setPrivateAddress] = useState('')
+    const [ETHAddress, setETHAddress] = useState('')
     const [value, setValue] = useState('')
     // TODO: getData to compute balance
     const [balance, setBalance] = useState('0')
-    const handlePrivateAddressChange = (event: {
+    const handleETHAddressChange = (event: {
         target: { value: SetStateAction<string> }
-    }) => setPrivateAddress(event.target.value)
+    }) => setETHAddress(event.target.value)
     const handleValueChange = (event: {
         target: { value: SetStateAction<string> }
     }) => setValue(event.target.value)
@@ -43,7 +47,15 @@ export default function Withdraw() {
         setIsLoading(true)
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum)
-            const id = new Identity(userId)
+            const unirep = new ethers.Contract(
+                unirepAddress,
+                unirepAbi,
+                provider
+            )
+            const app = new ethers.Contract(appAddress, abi, provider)
+            if (window.localStorage.getItem('userId') === null)
+                throw new Error('user has not signed up')
+            const id = new Identity(window.localStorage.getItem('userId'))
             const userState = new UserState({
                 id: id,
                 prover: prover,
@@ -51,9 +63,9 @@ export default function Withdraw() {
                 attesterId: BigInt(appAddress),
                 unirepAddress: unirepAddress,
             })
+            console.log('withdraw widraw start')
             await userState.start()
             await userState.waitForSync()
-            console.log(await userState.getData())
             const currentEpoch = userState.sync.calcCurrentEpoch()
             const latestTransitionedEpoch =
                 await userState.latestTransitionedEpoch()
@@ -77,7 +89,7 @@ export default function Withdraw() {
             }
             const revealNonce = true
             const epkNonce = 0
-            const sigData = address
+            const sigData = ETHAddress
             const { publicSignals, proof } =
                 await userState.genProveReputationProof({
                     minRep: Number(value),
@@ -86,7 +98,7 @@ export default function Withdraw() {
                     data: sigData,
                 })
             const data = app.interface.encodeFunctionData('withdraw', [
-                privateAddress,
+                ETHAddress,
                 publicSignals,
                 proof,
             ])
@@ -100,19 +112,28 @@ export default function Withdraw() {
                     },
                 ],
             })
+            userState.stop()
         } catch (err: any) {
             window.alert(err.message)
         } finally {
             setValue('')
-            setPrivateAddress('')
+            setETHAddress('')
             setIsLoading(false)
         }
     }
 
     const getData = async () => {
         try {
+            if (address === '') {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts',
+                })
+                setAddress(accounts[0])
+            }
             const provider = new ethers.providers.Web3Provider(window.ethereum)
-            const id = new Identity(userId)
+            if (window.localStorage.getItem('userId') === null)
+                throw new Error('user has not signed up')
+            const id = new Identity(window.localStorage.getItem('userId'))
             const userState = new UserState({
                 id: id,
                 prover: prover,
@@ -120,9 +141,12 @@ export default function Withdraw() {
                 attesterId: BigInt(appAddress),
                 unirepAddress: unirepAddress,
             })
+            console.log('withdraw getdata start')
             await userState.start()
             await userState.waitForSync()
-            return userState.getData()
+            const data = await userState.getData()
+            userState.stop()
+            return data
         } catch (err: any) {
             window.alert(err.message)
         }
@@ -143,8 +167,8 @@ export default function Withdraw() {
             <HStack w="full">
                 <Text w="250px">Input an ETH address:</Text>
                 <Input
-                    value={privateAddress}
-                    onChange={handlePrivateAddressChange}
+                    value={ETHAddress}
+                    onChange={handleETHAddressChange}
                     placeholder="0x1234..."
                     w="full"
                     bgColor="white"

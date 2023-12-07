@@ -6,11 +6,10 @@ import {
     SetStateAction,
     useState,
     ReactNode,
+    useEffect,
 } from 'react'
 
 interface ContextProps {
-    userId: string
-    setUserId: Dispatch<SetStateAction<string>>
     address: string
     setAddress: Dispatch<SetStateAction<string>>
     epoch: number
@@ -18,8 +17,6 @@ interface ContextProps {
 }
 
 const GlobalContext = createContext<ContextProps>({
-    userId: '',
-    setUserId: (): string => '',
     address: '',
     setAddress: (): string => '',
     epoch: 0,
@@ -47,13 +44,26 @@ export const GlobalContextProvider = ({
 }: {
     children: ReactNode
 }) => {
-    const [userId, setUserId] = useState('')
     const [address, setAddress] = useState('')
     const [epoch, setEpoch] = useState(0)
 
+    useEffect(() => {
+        if (
+            window.localStorage.getItem('email') !== null &&
+            window.localStorage.getItem('password') !== null
+        ) {
+            const storageEmail = window.localStorage.getItem('email')
+            const storagePassword = window.localStorage.getItem('password')
+            const storageUserId =
+                window.localStorage.getItem('userId') ??
+                (storageEmail ?? '') + (storagePassword ?? '')
+            window.localStorage.setItem('userId', storageUserId)
+        }
+    }, [])
+
     return (
         <GlobalContext.Provider
-            value={{ userId, setUserId, address, setAddress, epoch, setEpoch }}
+            value={{ address, setAddress, epoch, setEpoch }}
         >
             {children}
         </GlobalContext.Provider>

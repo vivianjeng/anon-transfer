@@ -22,11 +22,10 @@ const address = '0x9A676e781A523b5d0C0e43731313A708CB607508'
 const message = 'Sign up for Anon Transfer'
 
 export default function Wallet() {
-    const { userId, setUserId, address, setAddress, epoch, setEpoch } =
-        useGlobalContext()
+    const { address, setAddress, epoch, setEpoch } = useGlobalContext()
     const [remaining, setRemaining] = React.useState(0)
 
-    window.ethereum.on('accountsChanged', handleAccountsChanged)
+    // window.ethereum.on('accountsChanged', handleAccountsChanged)
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -39,10 +38,14 @@ export default function Wallet() {
 
     const signMessage = async () => {
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum)
-            const signer = provider.getSigner()
-            const signatureHash = await signer.signMessage(message)
-            return signatureHash
+            if (typeof window !== undefined) {
+                const provider = new ethers.providers.Web3Provider(
+                    window.ethereum
+                )
+                const signer = provider.getSigner()
+                const signatureHash = await signer.signMessage(message)
+                return signatureHash
+            }
         } catch (err: any) {
             window.alert(err.message)
         }
@@ -63,7 +66,6 @@ export default function Wallet() {
             if (accounts.length !== 0) {
                 setAddress(accounts[0])
                 const signature = await signMessage()
-                setUserId(signature || '')
             }
 
             try {
@@ -76,7 +78,6 @@ export default function Wallet() {
                 }
                 setAddress(obj.address)
                 const signature = await signMessage()
-                setUserId(signature || '')
             } catch (err: any) {
                 return {
                     address: '',
@@ -93,13 +94,6 @@ export default function Wallet() {
 
     return (
         <VStack>
-            <HStack w="full">
-                <Text textAlign="left" fontSize={20}>
-                    Anon Transfer
-                </Text>
-                <Spacer width="auto"></Spacer>
-                <Signup />
-            </HStack>
             <HStack w="full">
                 <Text>Epoch: {epoch}</Text>
                 <Spacer width="5rem"></Spacer>

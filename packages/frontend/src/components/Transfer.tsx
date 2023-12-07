@@ -6,8 +6,14 @@ import { SetStateAction, useState } from 'react'
 import { useGlobalContext } from '@/contexts/User'
 import CardComponent from './Card'
 
+declare global {
+    interface Window {
+        ethereum?: any
+    }
+}
+
 export default function Transfer() {
-    const { userId, setUserId, address, setAddress } = useGlobalContext()
+    const { address, setAddress } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [privateAddress, setPrivateAddress] = useState('')
     const [value, setValue] = useState('')
@@ -26,6 +32,12 @@ export default function Transfer() {
                 privateAddress,
             ])
             const hexValue = '0x' + BigInt(value).toString(16)
+            if (address === '') {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts',
+                })
+                setAddress(accounts[0])
+            }
             await window.ethereum.request({
                 method: 'eth_sendTransaction',
                 params: [

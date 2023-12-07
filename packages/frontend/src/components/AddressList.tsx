@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Button, Text, VStack } from '@chakra-ui/react'
 import CopyAddress from './CopyAddress'
 import { genEpochKey } from '@unirep/utils'
-import { Identity } from '@semaphore-protocol/identity'
+const { Identity } = require('@semaphore-protocol/identity')
 import prover from '@unirep/circuits/provers/web'
 import { UserState } from '@unirep/core'
 import { ethers } from 'ethers'
@@ -11,42 +11,65 @@ import abi from '@unirep/contracts/abi/Unirep.json'
 import { useGlobalContext } from '@/contexts/User'
 import CardComponent from './Card'
 
+declare global {
+    interface Window {
+        ethereum?: any
+    }
+}
+
 const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
 const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
 // const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
 const chainId = 11155111
 // const chainId = 1337
-const provider = new ethers.providers.Web3Provider(window.ethereum)
-const unirep = new ethers.Contract(unirepAddress, abi, provider)
 
 export default function AddressList() {
-    const { userId, setUserId, address, epoch, setEpoch } = useGlobalContext()
+    const { address, setAddress, epoch, setEpoch } = useGlobalContext()
     const [transitionEpoch, setTransitionEpoch] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const id = new Identity(userId)
-    const userState = new UserState({
-        id: id,
-        prover: prover,
-        provider: provider,
-        attesterId: BigInt(appAddress),
-        unirepAddress: unirepAddress,
-    })
-    const epochKeys = new Array(3)
-        .fill(0)
-        .map(
-            (_, i) =>
-                '0x' +
-                genEpochKey(id.secret, appAddress, epoch, i, chainId).toString(
-                    16
-                )
-        )
+    const [epochKeys, setEpochKeys] = useState<string[]>([])
 
     const getData = async () => {
         try {
+            if (address === '') {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts',
+                })
+                setAddress(accounts[0])
+            }
+            const provider = new ethers.providers.Web3Provider(window?.ethereum)
+            const unirep = new ethers.Contract(unirepAddress, abi, provider)
+            if (window.localStorage.getItem('userId') === null)
+                throw new Error('user has not signed up')
+            const id = new Identity(window.localStorage.getItem('userId'))
+            const userState = new UserState({
+                id: id,
+                prover: prover,
+                provider: provider,
+                attesterId: BigInt(appAddress),
+                unirepAddress: unirepAddress,
+            })
+            const epks = new Array(3)
+                .fill(0)
+                .map(
+                    (_, i) =>
+                        '0x' +
+                        genEpochKey(
+                            id.secret,
+                            appAddress,
+                            epoch,
+                            i,
+                            chainId
+                        ).toString(16)
+                )
+            setEpochKeys(epks)
+            console.log('getdata start')
             await userState.start()
             await userState.waitForSync()
-            return userState.latestTransitionedEpoch()
+            const latestTransitionedEpoch =
+                await userState.latestTransitionedEpoch()
+            userState.stop()
+            return latestTransitionedEpoch
         } catch (err: any) {
             window.alert(err.message)
         }
@@ -55,8 +78,36 @@ export default function AddressList() {
     const transition = async () => {
         setIsLoading(true)
         try {
+            const provider = new ethers.providers.Web3Provider(window?.ethereum)
+            const unirep = new ethers.Contract(unirepAddress, abi, provider)
+            if (window.localStorage.getItem('userId') === null)
+                throw new Error('user has not signed up')
+            const id = new Identity(window.localStorage.getItem('userId'))
+            const userState = new UserState({
+                id: id,
+                prover: prover,
+                provider: provider,
+                attesterId: BigInt(appAddress),
+                unirepAddress: unirepAddress,
+            })
+            const epks = new Array(3)
+                .fill(0)
+                .map(
+                    (_, i) =>
+                        '0x' +
+                        genEpochKey(
+                            id.secret,
+                            appAddress,
+                            epoch,
+                            i,
+                            chainId
+                        ).toString(16)
+                )
+            setEpochKeys(epks)
+            console.log('transition start')
             await userState.start()
             await userState.waitForSync()
+            console.log(await userState.getData())
             const { publicSignals, proof, toEpoch } =
                 await userState.genUserStateTransitionProof()
             const data = unirep.interface.encodeFunctionData(
@@ -74,6 +125,7 @@ export default function AddressList() {
                 ],
             })
             setTransitionEpoch(Number(toEpoch))
+            userState.stop()
         } catch (err: any) {
             window.alert(err.message)
         } finally {

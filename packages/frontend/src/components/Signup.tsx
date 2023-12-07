@@ -8,7 +8,7 @@ import {
     Tooltip,
 } from '@chakra-ui/react'
 import { ethers } from 'ethers'
-import { Identity } from '@semaphore-protocol/identity'
+const { Identity } = require('@semaphore-protocol/identity')
 import { getUnirepContract } from '@unirep/contracts'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import prover from '@unirep/circuits/provers/web'
@@ -16,12 +16,15 @@ import { Circuit, SignupProof } from '@unirep/circuits'
 import { useEffect, useState } from 'react'
 import { useGlobalContext } from '@/contexts/User'
 
+declare global {
+    interface Window {
+        ethereum?: any
+    }
+}
+
 const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
 const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
 // const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
-
-const provider = new ethers.providers.Web3Provider(window.ethereum)
-const app = new ethers.Contract(appAddress, abi, provider)
 
 export default function Signup() {
     const [isLoading, setIsLoading] = useState(false)
@@ -35,7 +38,7 @@ export default function Signup() {
     const handlePasswordChange = (event: { target: { value: string } }) =>
         setPassword(event.target.value)
 
-    const { userId, setUserId, address, setAddress } = useGlobalContext()
+    const { address, setAddress } = useGlobalContext()
 
     useEffect(() => {
         if (
@@ -45,6 +48,7 @@ export default function Signup() {
             setIsDisabled(true)
             setEmail(window.localStorage.getItem('email') ?? '')
             setPassword(window.localStorage.getItem('password') ?? '')
+            window.localStorage.setItem('userId', email + password)
         }
     })
     const signup = async () => {
@@ -52,6 +56,14 @@ export default function Signup() {
         try {
             const secret = email + password
             const id = new Identity(secret)
+            if (address === '') {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts',
+                })
+                setAddress(accounts[0])
+            }
+            const provider = new ethers.providers.Web3Provider(window.ethereum)
+            const app = new ethers.Contract(appAddress, abi, provider)
             const unirep = getUnirepContract(unirepAddress, provider)
             const epoch = await unirep.attesterCurrentEpoch(appAddress)
             const { chainId } = await provider.getNetwork()
@@ -85,7 +97,7 @@ export default function Signup() {
             })
             window.localStorage.setItem('email', email)
             window.localStorage.setItem('password', password)
-            setUserId(secret)
+            window.localStorage.setItem('userId', secret)
             setIsDisabled(true)
         } catch (err: any) {
             window.alert(err.message)
