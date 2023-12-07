@@ -102,6 +102,7 @@ export default function Wallet() {
             <AddressList />
             <Transfer />
             <Withdraw />
+            <Spacer h="5rem" />
             {/* {userId && <AddressList epoch={epoch} />}
             {userId && <Transfer />}
             {userId && <Withdraw />} */}
