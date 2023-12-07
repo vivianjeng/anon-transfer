@@ -35,12 +35,7 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "epochKey",
-                "type": "uint256"
-            },
-            { "internalType": "uint48", "name": "epoch", "type": "uint48" }
+            { "internalType": "uint256", "name": "epochKey", "type": "uint256" }
         ],
         "name": "transfer",
         "outputs": [],

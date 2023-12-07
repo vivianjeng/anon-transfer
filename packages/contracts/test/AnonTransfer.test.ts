@@ -77,7 +77,7 @@ describe('Anon Transfer', function () {
             ) as bigint
             await app
                 .connect(sender)
-                .transfer(epochKey, epoch, { value: wei })
+                .transfer(epochKey, { value: wei })
                 .then((t) => t.wait())
             console.log(`sender of the transaction: ${sender.address}`)
             console.log(`transfer ${wei} Wei to private address ${epochKey}`)
