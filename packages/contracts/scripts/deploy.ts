@@ -17,7 +17,9 @@ deployApp().catch((err) => {
 })
 
 export async function deployApp() {
-    const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545')
+    const provider = new ethers.providers.JsonRpcProvider(
+        'http://127.0.0.1:8545'
+    )
     const signer = new ethers.Wallet(
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
         provider
@@ -42,12 +44,13 @@ export async function deployApp() {
     UNIREP_ADDRESS: '${unirep.address}',
     APP_ADDRESS: '${app.address}',
     ETH_PROVIDER_URL: '${hardhat.network.config.url ?? ''}',
-    ${Array.isArray(hardhat.network.config.accounts)
+    ${
+        Array.isArray(hardhat.network.config.accounts)
             ? `PRIVATE_KEY: '${hardhat.network.config.accounts[0]}',`
             : `/**
       This contract was deployed using a mnemonic. The PRIVATE_KEY variable needs to be set manually
     **/`
-        }
+    }
   }
   `
 
