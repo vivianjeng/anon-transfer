@@ -13,7 +13,6 @@ declare global {
 const theme = extendTheme({
     config: {
         useSystemColorMode: true,
-        initialColorMode: 'light',
     },
 })
 
@@ -21,10 +20,10 @@ export default function Home() {
     return (
         <ChakraProvider theme={theme}>
             <Header />
-            <VStack p={10} pt={3} gap={5}>
+            <VStack p={10} gap={5}>
                 <Wallet />
-                <Footer />
             </VStack>
+            <Footer />
         </ChakraProvider>
     )
 }

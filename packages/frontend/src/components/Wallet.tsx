@@ -1,5 +1,5 @@
 'use client'
-import { Text, Button, HStack, Spacer, VStack } from '@chakra-ui/react'
+import { Text, Box, HStack, Spacer, VStack } from '@chakra-ui/react'
 import React from 'react'
 
 import { useEffect } from 'react'
@@ -93,7 +93,7 @@ export default function Wallet() {
     }
 
     return (
-        <VStack w="80%">
+        <VStack w="80%" pt={50}>
             <HStack w="full">
                 <Text>Epoch: {epoch}</Text>
                 <Spacer width="5rem"></Spacer>
@@ -102,7 +102,7 @@ export default function Wallet() {
             <AddressList />
             <Transfer />
             <Withdraw />
-            <Spacer h="5rem" />
+            <Box h="100px" />
             {/* {userId && <AddressList epoch={epoch} />}
             {userId && <Transfer />}
             {userId && <Withdraw />} */}
