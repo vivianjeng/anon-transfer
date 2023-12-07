@@ -22,9 +22,9 @@ export default function ContractInfo() {
     return (
         <HStack>
             <Text>Sepolia Contract Address</Text>
-            <InputGroup size="md" w="400">
+            <InputGroup size="md" w="200">
                 <Input
-                    w="200"
+                    w="40"
                     pr="4.5rem"
                     value={appAddress}
                     placeholder={appAddress}

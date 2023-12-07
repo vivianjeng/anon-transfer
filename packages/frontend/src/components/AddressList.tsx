@@ -25,7 +25,7 @@ const chainId = 11155111
 // const chainId = 1337
 
 export default function AddressList() {
-    const { address, setAddress, epoch, setEpoch } = useGlobalContext()
+    const { address, setAddress, epoch, setEpoch, signIn } = useGlobalContext()
     const [transitionEpoch, setTransitionEpoch] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
     const [epochKeys, setEpochKeys] = useState<string[]>([])
@@ -40,7 +40,10 @@ export default function AddressList() {
             }
             const provider = new ethers.providers.Web3Provider(window?.ethereum)
             const unirep = new ethers.Contract(unirepAddress, abi, provider)
-            if (!window.localStorage.getItem('userId')) return
+            if (!window.localStorage.getItem('userId')) {
+                setEpochKeys([])
+                return
+            }
             const id = new Identity(window.localStorage.getItem('userId'))
             const userState = new UserState({
                 id: id,
@@ -136,21 +139,22 @@ export default function AddressList() {
         getData().then((res) => {
             setTransitionEpoch(res || 0)
         })
-    }, [])
+    }, [signIn])
 
     return (
         <CardComponent>
             <Text fontSize="2xl" w="full">
                 My private addresses:
             </Text>
-            {epochKeys.map((address, index) => (
-                <CopyAddress
-                    key={index}
-                    address={address}
-                    disabled={epoch !== transitionEpoch}
-                    w="full"
-                />
-            ))}
+            {signIn &&
+                epochKeys.map((address, index) => (
+                    <CopyAddress
+                        key={index}
+                        address={address}
+                        disabled={epoch !== transitionEpoch}
+                        w="full"
+                    />
+                ))}
             <Button
                 colorScheme="blue"
                 onClick={transition}

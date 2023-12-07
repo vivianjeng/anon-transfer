@@ -10,6 +10,8 @@ import {
 } from 'react'
 
 interface ContextProps {
+    signIn: boolean
+    setSignIn: Dispatch<SetStateAction<boolean>>
     address: string
     setAddress: Dispatch<SetStateAction<string>>
     epoch: number
@@ -17,6 +19,8 @@ interface ContextProps {
 }
 
 const GlobalContext = createContext<ContextProps>({
+    signIn: false,
+    setSignIn: (): boolean => false,
     address: '',
     setAddress: (): string => '',
     epoch: 0,
@@ -47,6 +51,7 @@ export const GlobalContextProvider = ({
 }: {
     children: ReactNode
 }) => {
+    const [signIn, setSignIn] = useState<boolean>(false)
     const [address, setAddress] = useState('')
     const [epoch, setEpoch] = useState(0)
 
@@ -62,11 +67,11 @@ export const GlobalContextProvider = ({
                 (storageEmail ?? '') + (storagePassword ?? '')
             window.localStorage.setItem('userId', storageUserId)
         }
-    }, [])
+    }, [signIn])
 
     return (
         <GlobalContext.Provider
-            value={{ address, setAddress, epoch, setEpoch }}
+            value={{ signIn, setSignIn, address, setAddress, epoch, setEpoch }}
         >
             {children}
         </GlobalContext.Provider>

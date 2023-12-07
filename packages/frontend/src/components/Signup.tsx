@@ -36,7 +36,7 @@ export default function Signup() {
     const handlePasswordChange = (event: { target: { value: string } }) =>
         setPassword(event.target.value)
 
-    const { address, setAddress } = useGlobalContext()
+    const { address, setAddress, signIn, setSignIn } = useGlobalContext()
 
     useEffect(() => {
         if (
@@ -48,16 +48,58 @@ export default function Signup() {
             setPassword(window.localStorage.getItem('password') ?? '')
             window.localStorage.setItem('userId', email + password)
         }
-    })
+    }, [isLoading, isDisabled])
+
+    const signout = async () => {
+        setIsLoading(true)
+        try {
+            window.localStorage.clear()
+            setIsDisabled(false)
+            setSignIn(false)
+        } catch (err: any) {
+            window.alert(err.message)
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     const signin = async () => {
         setIsLoading(true)
         try {
+            const id = new Identity(email + password)
+            const query = `
+        {
+        users(
+            where: {
+                attesterId: "${BigInt(appAddress).toString()}", 
+                commitment: "${BigInt(id.commitment).toString()}"
+            }) {
+                epoch
+            }
+        }`
+            const url = `https://api.studio.thegraph.com/query/48080/sepolia/v2.0.0-beta-5`
+            const res = await fetch(url, {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+
+                body: JSON.stringify({
+                    query: query,
+                }),
+            })
+            if (!res.ok)
+                throw new Error(`Subgraph error: ${JSON.stringify(res)}`)
+            const length = (await res.json()).data.users.length
+            if (length === 0)
+                throw new Error('User not found. Should sign up first.')
             const secret = email + password
             window.localStorage.setItem('email', email)
             window.localStorage.setItem('password', password)
             window.localStorage.setItem('userId', secret)
             setIsDisabled(true)
+            setSignIn(true)
         } catch (err: any) {
             window.alert(err.message)
         } finally {
@@ -113,6 +155,7 @@ export default function Signup() {
             window.localStorage.setItem('password', password)
             window.localStorage.setItem('userId', secret)
             setIsDisabled(true)
+            setSignIn(true)
         } catch (err: any) {
             window.alert(err.message)
         } finally {
@@ -159,7 +202,41 @@ export default function Signup() {
                     )}
                 </InputRightElement>
             </InputGroup>
-            <Button
+            {isDisabled ? (
+                <Button
+                    colorScheme="blue"
+                    onClick={signout}
+                    isLoading={isLoading}
+                >
+                    Sign Out
+                </Button>
+            ) : (
+                <>
+                    <Button onClick={signin} isLoading={isLoading}>
+                        <Tooltip
+                            placement="auto"
+                            label="You already signed in."
+                            isDisabled={!isDisabled}
+                        >
+                            Sign In
+                        </Tooltip>
+                    </Button>
+                    <Button
+                        colorScheme="blue"
+                        onClick={signup}
+                        isLoading={isLoading}
+                    >
+                        <Tooltip
+                            placement="auto"
+                            label="You already signed in."
+                            isDisabled={!isDisabled}
+                        >
+                            Sign Up
+                        </Tooltip>
+                    </Button>
+                </>
+            )}
+            {/* <Button
                 onClick={signin}
                 isLoading={isLoading}
                 isDisabled={isDisabled}
@@ -185,7 +262,7 @@ export default function Signup() {
                 >
                     Sign Up
                 </Tooltip>
-            </Button>
+            </Button> */}
         </HStack>
     )
 }
