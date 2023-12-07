@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { Button, Text, VStack } from '@chakra-ui/react'
+import { SettingsIcon } from '@chakra-ui/icons'
 import CopyAddress from './CopyAddress'
 import { genEpochKey } from '@unirep/utils'
 const { Identity } = require('@semaphore-protocol/identity')
@@ -39,8 +40,7 @@ export default function AddressList() {
             }
             const provider = new ethers.providers.Web3Provider(window?.ethereum)
             const unirep = new ethers.Contract(unirepAddress, abi, provider)
-            if (window.localStorage.getItem('userId') === null)
-                throw new Error('user has not signed up')
+            if (!window.localStorage.getItem('userId')) return
             const id = new Identity(window.localStorage.getItem('userId'))
             const userState = new UserState({
                 id: id,
@@ -80,8 +80,7 @@ export default function AddressList() {
         try {
             const provider = new ethers.providers.Web3Provider(window?.ethereum)
             const unirep = new ethers.Contract(unirepAddress, abi, provider)
-            if (window.localStorage.getItem('userId') === null)
-                throw new Error('user has not signed up')
+            if (!window.localStorage.getItem('userId')) return
             const id = new Identity(window.localStorage.getItem('userId'))
             const userState = new UserState({
                 id: id,
@@ -156,6 +155,7 @@ export default function AddressList() {
                 colorScheme="blue"
                 onClick={transition}
                 isLoading={isLoading}
+                rightIcon={<SettingsIcon />}
             >
                 Transition
             </Button>

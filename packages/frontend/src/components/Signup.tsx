@@ -5,8 +5,10 @@ import {
     InputGroup,
     InputRightElement,
     Text,
+    IconButton,
     Tooltip,
 } from '@chakra-ui/react'
+import { ViewOffIcon, ViewIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
 const { Identity } = require('@semaphore-protocol/identity')
 import { getUnirepContract } from '@unirep/contracts'
@@ -14,17 +16,13 @@ import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import prover from '@unirep/circuits/provers/web'
 import { Circuit, SignupProof } from '@unirep/circuits'
 import { useEffect, useState } from 'react'
-import { useGlobalContext } from '@/contexts/User'
+import { useGlobalContext, appAddress, unirepAddress } from '@/contexts/User'
 
 declare global {
     interface Window {
         ethereum?: any
     }
 }
-
-const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
-const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
-// const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
 
 export default function Signup() {
     const [isLoading, setIsLoading] = useState(false)
@@ -140,14 +138,25 @@ export default function Signup() {
                     isDisabled={isDisabled}
                 />
                 <InputRightElement width="4.5rem">
-                    <Button
-                        h="1.75rem"
-                        size="sm"
-                        onClick={handleClick}
-                        isDisabled={isDisabled}
-                    >
-                        {show ? 'Hide' : 'Show'}
-                    </Button>
+                    {show ? (
+                        <IconButton
+                            h="1.75rem"
+                            size="sm"
+                            aria-label="Search database"
+                            isDisabled={isDisabled}
+                            onClick={handleClick}
+                            icon={<ViewOffIcon />}
+                        />
+                    ) : (
+                        <IconButton
+                            h="1.75rem"
+                            size="sm"
+                            aria-label="Search database"
+                            isDisabled={isDisabled}
+                            onClick={handleClick}
+                            icon={<ViewIcon />}
+                        />
+                    )}
                 </InputRightElement>
             </InputGroup>
             <Button

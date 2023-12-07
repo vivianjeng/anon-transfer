@@ -1,4 +1,5 @@
 'use client'
+import ContractInfo from '@/components/ContractInfo'
 import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import Wallet from '@/components/Wallet'
@@ -20,7 +21,7 @@ export default function Home() {
     return (
         <ChakraProvider theme={theme}>
             <Header />
-            <VStack p={10} gap={5}>
+            <VStack p={10} gap={5} w="full">
                 <Wallet />
             </VStack>
             <Footer />
