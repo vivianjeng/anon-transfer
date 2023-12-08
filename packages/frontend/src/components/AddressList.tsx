@@ -32,6 +32,7 @@ export default function AddressList() {
 
     const getData = async () => {
         try {
+            if (!signIn) return
             if (address === '') {
                 const accounts = await window.ethereum.request({
                     method: 'eth_requestAccounts',
@@ -136,7 +137,6 @@ export default function AddressList() {
     }
 
     useEffect(() => {
-        if (address === '') return
         getData().then((res) => {
             setTransitionEpoch(res || 0)
         })

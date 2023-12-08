@@ -26,7 +26,7 @@ declare global {
 }
 
 export default function Withdraw() {
-    const { address, setAddress } = useGlobalContext()
+    const { address, setAddress, signIn } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [data, setData] = useState('')
     const [ETHAddress, setETHAddress] = useState('')
@@ -120,6 +120,7 @@ export default function Withdraw() {
 
     const getData = async () => {
         try {
+            if (!signIn) return
             if (address === '') {
                 const accounts = await window.ethereum.request({
                     method: 'eth_requestAccounts',
@@ -148,7 +149,6 @@ export default function Withdraw() {
     }
 
     useEffect(() => {
-        if (address === '') return
         getData().then((res) => {
             res && setData((res[0] - res[1]).toString())
         })
