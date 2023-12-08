@@ -238,13 +238,13 @@ export default function Signup({ ...props }: StackProps) {
                 <ModalOverlay />
 
                 <ModalContent p={5}>
-                    <ModalHeader p={6} alignItems={'center'}> Login </ModalHeader>
+                    <ModalHeader p={6} alignItems={'center'}>
+                        {' '}
+                        Login{' '}
+                    </ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <Text fontWeight={600}>
-                            {' '}
-                            Email:{' '}
-                        </Text>
+                        <Text fontWeight={600}> Email: </Text>
                         <InputGroup paddingBottom={5} size="md" width="30">
                             <Input
                                 p={3}
@@ -254,10 +254,8 @@ export default function Signup({ ...props }: StackProps) {
                                 isDisabled={isDisabled}
                             />
                         </InputGroup>
-                        <Text fontWeight={600}>
-                            Password:{' '}
-                        </Text>
-                        <InputGroup paddingBottom={5}  size="md" width="30">
+                        <Text fontWeight={600}>Password: </Text>
+                        <InputGroup paddingBottom={5} size="md" width="30">
                             <Input
                                 pr="4.5rem"
                                 type={show ? 'text' : 'password'}
@@ -289,7 +287,7 @@ export default function Signup({ ...props }: StackProps) {
                                 )}
                             </InputRightElement>
                         </InputGroup>
-                        <ButtonGroup >
+                        <ButtonGroup>
                             <Button onClick={signin} isLoading={isLoading}>
                                 <Tooltip
                                     placement="auto"
