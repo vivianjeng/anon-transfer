@@ -136,6 +136,7 @@ export default function AddressList() {
     }
 
     useEffect(() => {
+        if (address === '') return
         getData().then((res) => {
             setTransitionEpoch(res || 0)
         })

@@ -148,6 +148,7 @@ export default function Withdraw() {
     }
 
     useEffect(() => {
+        if (address === '') return
         getData().then((res) => {
             res && setData((res[0] - res[1]).toString())
         })
