@@ -57,8 +57,8 @@ export default function Header() {
             </Text>
             <Spacer />
 
-            <ContractInfo />
             <Signup display={{ base: 'none', md: 'flex' }} />
+            <ContractInfo />
             <ColorMode />
             <IconButton
                 // px="0 !important"

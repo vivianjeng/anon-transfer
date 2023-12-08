@@ -11,6 +11,13 @@ import {
     Box,
     StackProps,
     useDisclosure,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalCloseButton,
+    ButtonGroup,
 } from '@chakra-ui/react'
 import { ViewOffIcon, ViewIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
@@ -42,6 +49,8 @@ export default function Signup({ ...props }: StackProps) {
     const [show, setShow] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [isModalOpen, setIsModalOpen] = useState(false)
+
     const handleClick = () => setShow(!show)
     const handleEmailChange = (event: { target: { value: string } }) =>
         setEmail(event.target.value)
@@ -110,6 +119,7 @@ export default function Signup({ ...props }: StackProps) {
     }
 
     const signin = async () => {
+        setIsModalOpen(true)
         setIsLoading(true)
         try {
             const id = new Identity(email + password)
@@ -122,6 +132,7 @@ export default function Signup({ ...props }: StackProps) {
             window.localStorage.setItem('userId', secret)
             setIsDisabled(true)
             setSignIn(true)
+            setIsModalOpen(false)
         } catch (err: any) {
             window.alert(err.message)
         } finally {
@@ -186,6 +197,7 @@ export default function Signup({ ...props }: StackProps) {
 
             setIsDisabled(true)
             setSignIn(true)
+            setIsModalOpen(false)
         } catch (err: any) {
             window.alert(err.message)
         } finally {
@@ -214,97 +226,96 @@ export default function Signup({ ...props }: StackProps) {
                     </Button>
                 </>
             ) : (
-                <>
-                    <Text>email: </Text>
-                    <Input
-                        w="30"
-                        onChange={handleEmailChange}
-                        value={email}
-                        isDisabled={isDisabled}
-                    />
-                    <Text>password: </Text>
-                    <InputGroup size="md" width="30">
-                        <Input
-                            pr="4.5rem"
-                            type={show ? 'text' : 'password'}
-                            onChange={handlePasswordChange}
-                            value={password}
-                            isDisabled={isDisabled}
-                        />
-                        <InputRightElement width="4.5rem">
-                            {show ? (
-                                <IconButton
-                                    h="1.75rem"
-                                    size="sm"
-                                    aria-label="Search database"
-                                    isDisabled={isDisabled}
-                                    onClick={handleClick}
-                                    icon={<ViewOffIcon />}
-                                />
-                            ) : (
-                                <IconButton
-                                    h="1.75rem"
-                                    size="sm"
-                                    aria-label="Search database"
-                                    isDisabled={isDisabled}
-                                    onClick={handleClick}
-                                    icon={<ViewIcon />}
-                                />
-                            )}
-                        </InputRightElement>
-                    </InputGroup>
-                    <Button onClick={signin} isLoading={isLoading}>
-                        <Tooltip
-                            placement="auto"
-                            label="You already signed in."
-                            isDisabled={!isDisabled}
-                        >
-                            Sign In
-                        </Tooltip>
-                    </Button>
-                    <Button
-                        colorScheme="blue"
-                        onClick={signup}
-                        isLoading={isLoading}
-                    >
-                        <Transaction isOpen={isOpen} txHash={txHash} />
-                        <Tooltip
-                            placement="auto"
-                            label="You already signed in."
-                            isDisabled={!isDisabled}
-                        >
-                            Sign Up
-                        </Tooltip>
-                    </Button>
-                </>
+                <Button
+                    colorScheme="blue"
+                    onClick={() => setIsModalOpen(true)}
+                    // isLoading={isLoading}
+                >
+                    Connect
+                </Button>
             )}
-            {/* <Button
-                onClick={signin}
-                isLoading={isLoading}
-                isDisabled={isDisabled}
-            >
-                <Tooltip
-                    placement="auto"
-                    label="You already signed in."
-                    isDisabled={!isDisabled}
-                >
-                    Sign In
-                </Tooltip>
-            </Button>
-            <Button
-                colorScheme="blue"
-                onClick={signup}
-                isLoading={isLoading}
-                isDisabled={isDisabled}
-            >
-                <Tooltip
-                    placement="auto"
-                    label="You already signed in."
-                    isDisabled={!isDisabled}
-                >
-                    Sign Up
-                </Tooltip>
-            </Button> */}
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                <ModalOverlay />
+
+                <ModalContent p={5}>
+                    <ModalHeader p={6} alignItems={'center'}> Login </ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Text fontWeight={600}>
+                            {' '}
+                            Email:{' '}
+                        </Text>
+                        <InputGroup paddingBottom={5} size="md" width="30">
+                            <Input
+                                p={3}
+                                w="30"
+                                onChange={handleEmailChange}
+                                value={email}
+                                isDisabled={isDisabled}
+                            />
+                        </InputGroup>
+                        <Text fontWeight={600}>
+                            Password:{' '}
+                        </Text>
+                        <InputGroup paddingBottom={5}  size="md" width="30">
+                            <Input
+                                pr="4.5rem"
+                                type={show ? 'text' : 'password'}
+                                onChange={handlePasswordChange}
+                                value={password}
+                                isDisabled={isDisabled}
+                            />
+                            <br />
+                            <br />
+                            <InputRightElement width="4.5rem">
+                                {show ? (
+                                    <IconButton
+                                        h="1.75rem"
+                                        size="sm"
+                                        aria-label="Search database"
+                                        isDisabled={isDisabled}
+                                        onClick={handleClick}
+                                        icon={<ViewOffIcon />}
+                                    />
+                                ) : (
+                                    <IconButton
+                                        h="1.75rem"
+                                        size="sm"
+                                        aria-label="Search database"
+                                        isDisabled={isDisabled}
+                                        onClick={handleClick}
+                                        icon={<ViewIcon />}
+                                    />
+                                )}
+                            </InputRightElement>
+                        </InputGroup>
+                        <ButtonGroup >
+                            <Button onClick={signin} isLoading={isLoading}>
+                                <Tooltip
+                                    placement="auto"
+                                    label="You already signed in."
+                                    isDisabled={!isDisabled}
+                                >
+                                    Sign In
+                                </Tooltip>
+                            </Button>
+                            <Button
+                                colorScheme="blue"
+                                onClick={signup}
+                                isLoading={isLoading}
+                            >
+                                <Tooltip
+                                    placement="auto"
+                                    label="You already signed in."
+                                    isDisabled={!isDisabled}
+                                >
+                                    Sign Up
+                                </Tooltip>
+                            </Button>
+                        </ButtonGroup>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
         </HStack>
     )
 }
