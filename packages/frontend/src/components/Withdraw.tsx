@@ -1,12 +1,15 @@
 'use client'
 import {
+    Box,
     Button,
     Center,
     Flex,
     HStack,
     Input,
+    Spacer,
     Text,
     VStack,
+    useDisclosure,
 } from '@chakra-ui/react'
 import { UnlockIcon } from '@chakra-ui/icons'
 const { Identity } = require('@semaphore-protocol/identity')
@@ -18,6 +21,7 @@ import unirepAbi from '@unirep/contracts/abi/Unirep.json'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import { useGlobalContext, unirepAddress, appAddress } from '@/contexts/User'
 import CardComponent from './Card'
+import Transaction from './Transaction'
 
 declare global {
     interface Window {
@@ -26,12 +30,15 @@ declare global {
 }
 
 export default function Withdraw() {
+    const { isOpen, onToggle } = useDisclosure()
+    const [txHash, setTxHash] = useState('')
     const { address, setAddress, signIn } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [data, setData] = useState('')
     const [ETHAddress, setETHAddress] = useState('')
     const [value, setValue] = useState('')
     // TODO: getData to compute balance
+    const [pending, setPending] = useState('0')
     const [balance, setBalance] = useState('0')
     const handleETHAddressChange = (event: {
         target: { value: SetStateAction<string> }
@@ -67,7 +74,6 @@ export default function Withdraw() {
                 attesterId: BigInt(appAddress),
                 unirepAddress: unirepAddress,
             })
-            console.log('withdraw widraw start')
             await userState.start()
             await userState.waitForSync()
             const currentEpoch = userState.sync.calcCurrentEpoch()
@@ -80,7 +86,7 @@ export default function Withdraw() {
                     'userStateTransition',
                     [publicSignals, proof]
                 )
-                const txHash = await window.ethereum.request({
+                const tx = await window.ethereum.request({
                     method: 'eth_sendTransaction',
                     params: [
                         {
@@ -90,7 +96,9 @@ export default function Withdraw() {
                         },
                     ],
                 })
-                await provider.waitForTransaction(txHash)
+                setTxHash(tx)
+                onToggle()
+                await provider.waitForTransaction(tx)
                 window.localStorage.setItem(
                     'transitionEpoch',
                     toEpoch.toString()
@@ -99,6 +107,7 @@ export default function Withdraw() {
             const revealNonce = true
             const epkNonce = 0
             const sigData = ETHAddress
+            await userState.waitForSync()
             const { publicSignals, proof } =
                 await userState.genProveReputationProof({
                     minRep: Number(value),
@@ -111,7 +120,7 @@ export default function Withdraw() {
                 publicSignals,
                 proof,
             ])
-            await window.ethereum.request({
+            const tx = await window.ethereum.request({
                 method: 'eth_sendTransaction',
                 params: [
                     {
@@ -121,6 +130,8 @@ export default function Withdraw() {
                     },
                 ],
             })
+            setTxHash(tx)
+            onToggle()
             userState.stop()
         } catch (err: any) {
             window.alert(err.message)
@@ -128,12 +139,15 @@ export default function Withdraw() {
             setValue('')
             setETHAddress('')
             setIsLoading(false)
+            if (isOpen) {
+                onToggle()
+            }
         }
     }
 
     const getData = async () => {
         try {
-            if (!signIn) return
+            if (!window.localStorage.getItem('userId')) return
             if (address === '') {
                 const accounts = await window.ethereum.request({
                     method: 'eth_requestAccounts',
@@ -141,7 +155,6 @@ export default function Withdraw() {
                 setAddress(accounts[0])
             }
             const provider = new ethers.providers.Web3Provider(window.ethereum)
-            if (!window.localStorage.getItem('userId')) return
             const id = new Identity(window.localStorage.getItem('userId'))
             const userState = new UserState({
                 id: id,
@@ -150,10 +163,12 @@ export default function Withdraw() {
                 attesterId: BigInt(appAddress),
                 unirepAddress: unirepAddress,
             })
-            console.log('withdraw getdata start')
             await userState.start()
             await userState.waitForSync()
+            const provable = await userState.getProvableData()
             const data = await userState.getData()
+            setBalance((provable[0] - provable[1]).toString())
+            setPending((data[0] - data[1]).toString())
             userState.stop()
             return data
         } catch (err: any) {
@@ -162,18 +177,26 @@ export default function Withdraw() {
     }
 
     useEffect(() => {
-        getData().then((res) => {
-            res && setData((res[0] - res[1]).toString())
-        })
+        if (isOpen) {
+            const timeout = setTimeout(() => {
+                onToggle()
+            }, 3000)
+            return () => clearTimeout(timeout)
+        }
+        getData()
     }, [])
 
     return (
         <CardComponent>
+            <Transaction isOpen={isOpen} txHash={txHash} />
             <Text fontSize="2xl" w="full">
                 Withdraw
             </Text>
-
-            {/* TODO: display balance<Text w="full">Pending balance: {balance} wei</Text> */}
+            <HStack>
+                <Box>Pending balance: {pending} wei</Box>
+                <Spacer />
+                <Box>Withdrawable balance: {balance} wei</Box>
+            </HStack>
             <HStack w="full">
                 <Text w="250px">Input an ETH address:</Text>
                 <Input

@@ -10,6 +10,7 @@ import {
     Flex,
     Box,
     StackProps,
+    useDisclosure,
 } from '@chakra-ui/react'
 import { ViewOffIcon, ViewIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
@@ -25,6 +26,7 @@ import {
     unirepAddress,
     chainId,
 } from '@/contexts/User'
+import Transaction from './Transaction'
 
 declare global {
     interface Window {
@@ -33,8 +35,10 @@ declare global {
 }
 
 export default function Signup({ ...props }: StackProps) {
+    const { isOpen, onToggle } = useDisclosure()
     const [isLoading, setIsLoading] = useState(false)
     const [isDisabled, setIsDisabled] = useState(false)
+    const [txHash, setTxHash] = useState('')
     const [show, setShow] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -54,9 +58,15 @@ export default function Signup({ ...props }: StackProps) {
             setIsDisabled(true)
             setEmail(window.localStorage.getItem('email') ?? '')
             setPassword(window.localStorage.getItem('password') ?? '')
-            window.localStorage.setItem('userId', email + password)
+            setSignIn(true)
         }
-    }, [isLoading, isDisabled])
+        if (isOpen) {
+            const timeout = setTimeout(() => {
+                onToggle()
+            }, 3000)
+            return () => clearTimeout(timeout)
+        }
+    }, [isLoading, isDisabled, isOpen])
 
     const searchUser = async (commitment: bigint) => {
         const query = `
@@ -156,7 +166,7 @@ export default function Signup({ ...props }: StackProps) {
                     publicSignals,
                     proof,
                 ])
-                await window.ethereum.request({
+                const tx = await window.ethereum.request({
                     method: 'eth_sendTransaction',
                     params: [
                         {
@@ -166,16 +176,23 @@ export default function Signup({ ...props }: StackProps) {
                         },
                     ],
                 })
+                setTxHash(tx)
+                onToggle()
+                window.localStorage.setItem('transitionEpoch', epoch.toString())
             }
             window.localStorage.setItem('email', email)
             window.localStorage.setItem('password', password)
             window.localStorage.setItem('userId', secret)
+
             setIsDisabled(true)
             setSignIn(true)
         } catch (err: any) {
             window.alert(err.message)
         } finally {
             setIsLoading(false)
+            if (isOpen) {
+                onToggle()
+            }
         }
     }
     return (
@@ -186,7 +203,7 @@ export default function Signup({ ...props }: StackProps) {
                         Hello,{' '}
                         {email.indexOf('@') === -1
                             ? email
-                            : email.slice(email.indexOf('@'))}
+                            : email.slice(0, email.indexOf('@'))}
                     </Text>
                     <Button
                         colorScheme="blue"
@@ -250,6 +267,7 @@ export default function Signup({ ...props }: StackProps) {
                         onClick={signup}
                         isLoading={isLoading}
                     >
+                        <Transaction isOpen={isOpen} txHash={txHash} />
                         <Tooltip
                             placement="auto"
                             label="You already signed in."

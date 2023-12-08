@@ -1,11 +1,32 @@
 'use client'
 import { ethers } from 'ethers'
-import { Button, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
-import { ArrowForwardIcon } from '@chakra-ui/icons'
+import {
+    Alert,
+    AlertDialog,
+    AlertIcon,
+    Box,
+    Button,
+    Flex,
+    HStack,
+    Input,
+    Link,
+    Progress,
+    SlideFade,
+    Spacer,
+    Text,
+    VStack,
+    useDisclosure,
+} from '@chakra-ui/react'
+import {
+    ArrowForwardIcon,
+    CheckCircleIcon,
+    ExternalLinkIcon,
+} from '@chakra-ui/icons'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
-import { SetStateAction, useState } from 'react'
+import { SetStateAction, useEffect, useState } from 'react'
 import { appAddress, useGlobalContext } from '@/contexts/User'
 import CardComponent from './Card'
+import Transaction from './Transaction'
 
 declare global {
     interface Window {
@@ -14,10 +35,12 @@ declare global {
 }
 
 export default function Transfer() {
+    const { isOpen, onToggle } = useDisclosure()
     const { address, setAddress } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [privateAddress, setPrivateAddress] = useState('')
     const [value, setValue] = useState('')
+    const [txHash, setTxHash] = useState('')
     const handlePrivateAddressChange = (event: {
         target: { value: SetStateAction<string> }
     }) => setPrivateAddress(event.target.value)
@@ -40,7 +63,7 @@ export default function Transfer() {
                 connectedAddress = accounts[0]
                 setAddress(accounts[0])
             }
-            const txHash = await window.ethereum.request({
+            const tx = await window.ethereum.request({
                 method: 'eth_sendTransaction',
                 params: [
                     {
@@ -51,16 +74,32 @@ export default function Transfer() {
                     },
                 ],
             })
+            setTxHash(tx)
+            onToggle()
         } catch (err: any) {
             window.alert(err.message)
         } finally {
             setValue('')
             setPrivateAddress('')
             setIsLoading(false)
+            if (isOpen) {
+                onToggle()
+            }
         }
     }
+
+    useEffect(() => {
+        if (isOpen) {
+            const timeout = setTimeout(() => {
+                onToggle()
+            }, 3000)
+            return () => clearTimeout(timeout)
+        }
+    }, [isOpen])
+
     return (
         <CardComponent>
+            <Transaction isOpen={isOpen} txHash={txHash} />
             <Text fontSize="2xl" w="full">
                 Transfer
             </Text>

@@ -8,6 +8,7 @@ import {
 import { Circuit } from '@unirep/circuits'
 import * as hardhat from 'hardhat'
 import APP from '../artifacts/contracts/AnonTransfer.sol/AnonTransfer.json'
+import { Synchronizer } from '@unirep/core'
 
 const epochLength = 300
 
@@ -35,6 +36,15 @@ export async function deployApp() {
     const app = await App.deploy(unirep.address, helper.address, epochLength)
 
     await app.deployed()
+
+    const sync = new Synchronizer({
+        attesterId: BigInt(app.address),
+        unirepAddress: unirep.address,
+        provider: provider,
+    })
+    await sync.start()
+    await sync.waitForSync()
+    console.log(await sync.db.findMany('Attester', { where: {} }))
 
     console.log(
         `AnonTransfer with epoch length ${epochLength} is deployed to ${app.address}`

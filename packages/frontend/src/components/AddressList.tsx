@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Button, Text, VStack } from '@chakra-ui/react'
+import { Button, Text, VStack, useDisclosure } from '@chakra-ui/react'
 import { SettingsIcon } from '@chakra-ui/icons'
 import CopyAddress from './CopyAddress'
 import { genEpochKey } from '@unirep/utils'
@@ -14,8 +14,10 @@ import {
     chainId,
     unirepAddress,
     useGlobalContext,
+    culcEpoch,
 } from '@/contexts/User'
 import CardComponent from './Card'
+import Transaction from './Transaction'
 
 declare global {
     interface Window {
@@ -24,14 +26,16 @@ declare global {
 }
 
 export default function AddressList() {
+    const { isOpen, onToggle } = useDisclosure()
     const { address, setAddress, epoch, setEpoch, signIn } = useGlobalContext()
     const [transitionEpoch, setTransitionEpoch] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
+    const [txHash, setTxHash] = useState('')
     const [epochKeys, setEpochKeys] = useState<string[]>(['', '', ''])
 
     const getData = () => {
         try {
-            if (window.localStorage.getItem('userId') === undefined) return
+            if (!window.localStorage.getItem('userId')) return
             const id = new Identity(window.localStorage.getItem('userId'))
             const epks = new Array(3)
                 .fill(0)
@@ -41,7 +45,7 @@ export default function AddressList() {
                         genEpochKey(
                             id.secret,
                             appAddress,
-                            epoch,
+                            culcEpoch(),
                             i,
                             chainId
                         ).toString(16)
@@ -82,7 +86,7 @@ export default function AddressList() {
                 'userStateTransition',
                 [publicSignals, proof]
             )
-            await window.ethereum.request({
+            const tx = await window.ethereum.request({
                 method: 'eth_sendTransaction',
                 params: [
                     {
@@ -92,6 +96,8 @@ export default function AddressList() {
                     },
                 ],
             })
+            setTxHash(tx)
+            onToggle()
             window.localStorage.setItem('transitionEpoch', toEpoch.toString())
             setTransitionEpoch(Number(toEpoch))
             userState.stop()
@@ -99,19 +105,29 @@ export default function AddressList() {
             window.alert(err.message)
         } finally {
             setIsLoading(false)
+            if (isOpen) {
+                onToggle()
+            }
         }
     }
 
     useEffect(() => {
         getData()
-        if (window.localStorage.getItem('transitionEpoch') !== undefined)
+        if (window.localStorage.getItem('transitionEpoch'))
             setTransitionEpoch(
                 Number(window.localStorage.getItem('transitionEpoch'))
             )
-    }, [epoch])
+        if (isOpen) {
+            const timeout = setTimeout(() => {
+                onToggle()
+            }, 3000)
+            return () => clearTimeout(timeout)
+        }
+    }, [])
 
     return (
         <CardComponent>
+            <Transaction isOpen={isOpen} txHash={txHash} />
             <Text fontSize="2xl" w="full">
                 My private addresses:
             </Text>
@@ -120,7 +136,12 @@ export default function AddressList() {
                     <CopyAddress
                         key={index}
                         address={address}
-                        disabled={epoch !== transitionEpoch}
+                        disabled={
+                            epoch !==
+                            Number(
+                                window.localStorage.getItem('transitionEpoch')
+                            )
+                        }
                         w="full"
                     />
                 ))}

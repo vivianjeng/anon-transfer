@@ -6,16 +6,10 @@ import {
     Input,
     InputProps,
     useClipboard,
-    useDisclosure,
-    AlertDialog,
-    AlertDialogBody,
-    AlertDialogCloseButton,
-    AlertDialogContent,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogOverlay,
     Tooltip,
+    useDisclosure,
 } from '@chakra-ui/react'
+import AlertDialogComponent from './AlertDialog'
 import { useRef } from 'react'
 
 export type CopyAddressProps = {
@@ -66,34 +60,13 @@ export default function CopyAddress({
                     {hasCopied ? 'copied!' : 'copy'}
                 </Tooltip>
             </Button>
-            <AlertDialog
-                motionPreset="slideInBottom"
-                leastDestructiveRef={cancelRef}
+            <AlertDialogComponent
+                header=""
+                body={`This private address will only be valid for epoch ${epoch}`}
+                button="I understand"
                 onClose={onClose}
                 isOpen={isOpen}
-                isCentered
-            >
-                <AlertDialogOverlay />
-
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        Use this private address carefully
-                    </AlertDialogHeader>
-                    <AlertDialogCloseButton />
-                    <AlertDialogBody>
-                        This private address will only be valid for epoch{' '}
-                        {epoch}.
-                    </AlertDialogBody>
-                    <AlertDialogFooter>
-                        {/* <Button ref={cancelRef} onClick={onClose}>
-                            No
-                        </Button> */}
-                        <Button colorScheme="red" ml={3} onClick={onClose}>
-                            I understand
-                        </Button>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            />
         </HStack>
     )
 }

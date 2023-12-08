@@ -18,7 +18,6 @@ export default {
             accounts: [
                 '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
             ],
-            chainId: 1337,
         },
         arb: {
             url: 'https://arbitrum.goerli.unirep.io',
