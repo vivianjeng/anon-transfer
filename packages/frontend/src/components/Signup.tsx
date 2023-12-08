@@ -75,8 +75,6 @@ export default function Signup() {
         })
         if (!res.ok) throw new Error(`Subgraph error: ${JSON.stringify(res)}`)
         const length = (await res.json()).data.users.length
-        if (length === 0)
-            throw new Error('User not found. Should sign up first.')
         return length
     }
 
@@ -97,7 +95,8 @@ export default function Signup() {
         setIsLoading(true)
         try {
             const id = new Identity(email + password)
-            await searchUser(id.commitment)
+            const length = await searchUser(id.commitment)
+            if (length === 0) throw new Error('User not found. Should sign up first.')
             const secret = email + password
             window.localStorage.setItem('email', email)
             window.localStorage.setItem('password', password)
