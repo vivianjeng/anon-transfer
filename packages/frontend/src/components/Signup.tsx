@@ -99,7 +99,8 @@ export default function Signup({ ...props }: StackProps) {
         try {
             const id = new Identity(email + password)
             const length = await searchUser(id.commitment)
-            if (length === 0) throw new Error('User not found. Should sign up first.')
+            if (length === 0)
+                throw new Error('User not found. Should sign up first.')
             const secret = email + password
             window.localStorage.setItem('email', email)
             window.localStorage.setItem('password', password)
