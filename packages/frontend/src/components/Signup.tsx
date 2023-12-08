@@ -19,7 +19,12 @@ import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import prover from '@unirep/circuits/provers/web'
 import { Circuit, SignupProof } from '@unirep/circuits'
 import { useEffect, useState } from 'react'
-import { useGlobalContext, appAddress, unirepAddress } from '@/contexts/User'
+import {
+    useGlobalContext,
+    appAddress,
+    unirepAddress,
+    chainId,
+} from '@/contexts/User'
 
 declare global {
     interface Window {
@@ -133,7 +138,6 @@ export default function Signup({ ...props }: StackProps) {
                 const app = new ethers.Contract(appAddress, abi, provider)
                 const unirep = getUnirepContract(unirepAddress, provider)
                 const epoch = await unirep.attesterCurrentEpoch(appAddress)
-                const { chainId } = await provider.getNetwork()
                 const circuitInputs = {
                     identity_secret: id.secret,
                     epoch: epoch,

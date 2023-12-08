@@ -9,7 +9,12 @@ import prover from '@unirep/circuits/provers/web'
 import { UserState } from '@unirep/core'
 import { ethers } from 'ethers'
 import abi from '@unirep/contracts/abi/Unirep.json'
-import { useGlobalContext } from '@/contexts/User'
+import {
+    appAddress,
+    chainId,
+    unirepAddress,
+    useGlobalContext,
+} from '@/contexts/User'
 import CardComponent from './Card'
 
 declare global {
@@ -18,41 +23,16 @@ declare global {
     }
 }
 
-const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
-const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
-// const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
-const chainId = 11155111
-// const chainId = 1337
-
 export default function AddressList() {
     const { address, setAddress, epoch, setEpoch, signIn } = useGlobalContext()
     const [transitionEpoch, setTransitionEpoch] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
-    const [epochKeys, setEpochKeys] = useState<string[]>([])
+    const [epochKeys, setEpochKeys] = useState<string[]>(['', '', ''])
 
-    const getData = async () => {
+    const getData = () => {
         try {
-            if (!signIn) return
-            if (address === '') {
-                const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts',
-                })
-                setAddress(accounts[0])
-            }
-            const provider = new ethers.providers.Web3Provider(window?.ethereum)
-            const unirep = new ethers.Contract(unirepAddress, abi, provider)
-            if (!window.localStorage.getItem('userId')) {
-                setEpochKeys([])
-                return
-            }
+            if (window.localStorage.getItem('userId') === undefined) return
             const id = new Identity(window.localStorage.getItem('userId'))
-            const userState = new UserState({
-                id: id,
-                prover: prover,
-                provider: provider,
-                attesterId: BigInt(appAddress),
-                unirepAddress: unirepAddress,
-            })
             const epks = new Array(3)
                 .fill(0)
                 .map(
@@ -67,13 +47,6 @@ export default function AddressList() {
                         ).toString(16)
                 )
             setEpochKeys(epks)
-            console.log('getdata start')
-            await userState.start()
-            await userState.waitForSync()
-            const latestTransitionedEpoch =
-                await userState.latestTransitionedEpoch()
-            userState.stop()
-            return latestTransitionedEpoch
         } catch (err: any) {
             window.alert(err.message)
         }
@@ -82,6 +55,14 @@ export default function AddressList() {
     const transition = async () => {
         setIsLoading(true)
         try {
+            let connectedAddress = address
+            if (address === '') {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts',
+                })
+                connectedAddress = accounts[0]
+                setAddress(accounts[0])
+            }
             const provider = new ethers.providers.Web3Provider(window?.ethereum)
             const unirep = new ethers.Contract(unirepAddress, abi, provider)
             if (!window.localStorage.getItem('userId')) return
@@ -93,24 +74,8 @@ export default function AddressList() {
                 attesterId: BigInt(appAddress),
                 unirepAddress: unirepAddress,
             })
-            const epks = new Array(3)
-                .fill(0)
-                .map(
-                    (_, i) =>
-                        '0x' +
-                        genEpochKey(
-                            id.secret,
-                            appAddress,
-                            epoch,
-                            i,
-                            chainId
-                        ).toString(16)
-                )
-            setEpochKeys(epks)
-            console.log('transition start')
             await userState.start()
             await userState.waitForSync()
-            console.log(await userState.getData())
             const { publicSignals, proof, toEpoch } =
                 await userState.genUserStateTransitionProof()
             const data = unirep.interface.encodeFunctionData(
@@ -121,12 +86,13 @@ export default function AddressList() {
                 method: 'eth_sendTransaction',
                 params: [
                     {
-                        from: address,
+                        from: connectedAddress,
                         to: unirepAddress,
                         data: data,
                     },
                 ],
             })
+            window.localStorage.setItem('transitionEpoch', toEpoch.toString())
             setTransitionEpoch(Number(toEpoch))
             userState.stop()
         } catch (err: any) {
@@ -137,10 +103,12 @@ export default function AddressList() {
     }
 
     useEffect(() => {
-        getData().then((res) => {
-            setTransitionEpoch(res || 0)
-        })
-    }, [signIn])
+        getData()
+        if (window.localStorage.getItem('transitionEpoch') !== undefined)
+            setTransitionEpoch(
+                Number(window.localStorage.getItem('transitionEpoch'))
+            )
+    }, [epoch])
 
     return (
         <CardComponent>

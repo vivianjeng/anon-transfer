@@ -8,6 +8,7 @@ import {
     ReactNode,
     useEffect,
 } from 'react'
+import detectEthereumProvider from '@metamask/detect-provider'
 
 interface ContextProps {
     signIn: boolean
@@ -30,6 +31,7 @@ const GlobalContext = createContext<ContextProps>({
 const startTimestamp = 1701792432
 // const startTimestamp = 1701806259
 const epochLength = 300
+export const chainId = 11155111
 export const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
 export const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
 // const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
@@ -54,6 +56,8 @@ export const GlobalContextProvider = ({
     const [signIn, setSignIn] = useState<boolean>(false)
     const [address, setAddress] = useState('')
     const [epoch, setEpoch] = useState(0)
+    const initialState = { accounts: [] }
+    const [wallet, setWallet] = useState(initialState)
 
     useEffect(() => {
         if (
@@ -66,8 +70,39 @@ export const GlobalContextProvider = ({
                 window.localStorage.getItem('userId') ??
                 (storageEmail ?? '') + (storagePassword ?? '')
             window.localStorage.setItem('userId', storageUserId)
+            setSignIn(true)
         }
-    }, [signIn])
+
+        const updateWallet = async (accounts: any) => {
+            setWallet({ accounts })
+        }
+
+        const refreshAccounts = (accounts: any) => {
+            if (accounts.length > 0) {
+                updateWallet(accounts)
+            } else {
+                // if length 0, user is disconnected
+                setWallet(initialState)
+            }
+        }
+
+        const getProvider = async () => {
+            const provider = await detectEthereumProvider({ silent: true })
+
+            if (provider) {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_accounts',
+                })
+                setAddress(accounts[0])
+                window.ethereum.on('accountsChanged', refreshAccounts)
+            }
+        }
+
+        getProvider()
+        return () => {
+            window.ethereum?.removeListener('accountsChanged', refreshAccounts)
+        }
+    }, [])
 
     return (
         <GlobalContext.Provider

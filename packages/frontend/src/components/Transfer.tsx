@@ -32,17 +32,19 @@ export default function Transfer() {
                 privateAddress,
             ])
             const hexValue = '0x' + BigInt(value).toString(16)
+            let connectedAddress = address
             if (address === '') {
                 const accounts = await window.ethereum.request({
                     method: 'eth_requestAccounts',
                 })
+                connectedAddress = accounts[0]
                 setAddress(accounts[0])
             }
-            await window.ethereum.request({
+            const txHash = await window.ethereum.request({
                 method: 'eth_sendTransaction',
                 params: [
                     {
-                        from: address,
+                        from: connectedAddress,
                         to: appAddress,
                         value: hexValue,
                         data: data,

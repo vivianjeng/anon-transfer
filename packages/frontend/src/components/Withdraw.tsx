@@ -43,6 +43,14 @@ export default function Withdraw() {
     const withdraw = async () => {
         setIsLoading(true)
         try {
+            let connectedAddress = address
+            if (address === '') {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts',
+                })
+                connectedAddress = accounts[0]
+                setAddress(accounts[0])
+            }
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const unirep = new ethers.Contract(
                 unirepAddress,
@@ -66,22 +74,27 @@ export default function Withdraw() {
             const latestTransitionedEpoch =
                 await userState.latestTransitionedEpoch()
             if (currentEpoch !== latestTransitionedEpoch) {
-                const { publicSignals, proof } =
+                const { publicSignals, proof, toEpoch } =
                     await userState.genUserStateTransitionProof()
                 const data = unirep.interface.encodeFunctionData(
                     'userStateTransition',
                     [publicSignals, proof]
                 )
-                await window.ethereum.request({
+                const txHash = await window.ethereum.request({
                     method: 'eth_sendTransaction',
                     params: [
                         {
-                            from: address,
+                            from: connectedAddress,
                             to: unirepAddress,
                             data: data,
                         },
                     ],
                 })
+                await provider.waitForTransaction(txHash)
+                window.localStorage.setItem(
+                    'transitionEpoch',
+                    toEpoch.toString()
+                )
             }
             const revealNonce = true
             const epkNonce = 0
@@ -159,7 +172,8 @@ export default function Withdraw() {
             <Text fontSize="2xl" w="full">
                 Withdraw
             </Text>
-            <Text w="full">Pending balance: {balance} wei</Text>
+            // TODO: display balance
+            {/* <Text w="full">Pending balance: {balance} wei</Text> */}
             <HStack w="full">
                 <Text w="250px">Input an ETH address:</Text>
                 <Input
