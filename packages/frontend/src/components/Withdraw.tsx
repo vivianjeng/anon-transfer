@@ -172,8 +172,8 @@ export default function Withdraw() {
             <Text fontSize="2xl" w="full">
                 Withdraw
             </Text>
-            // TODO: display balance
-            {/* <Text w="full">Pending balance: {balance} wei</Text> */}
+
+            {/* TODO: display balance<Text w="full">Pending balance: {balance} wei</Text> */}
             <HStack w="full">
                 <Text w="250px">Input an ETH address:</Text>
                 <Input
