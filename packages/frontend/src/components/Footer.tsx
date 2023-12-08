@@ -1,6 +1,14 @@
-import { Flex, HStack, Link, Spacer, Text } from '@chakra-ui/react'
+import {
+    Flex,
+    FlexProps,
+    HStack,
+    Link,
+    Spacer,
+    StackProps,
+    Text,
+} from '@chakra-ui/react'
 
-export default function Footer() {
+export default function Footer({ ...props }: FlexProps) {
     return (
         <Flex
             position="fixed"
@@ -12,6 +20,7 @@ export default function Footer() {
             pb="10"
             bgColor="white"
             _dark={{ bgColor: 'gray.800' }}
+            {...props}
         >
             <Flex
                 pt={5}
@@ -20,7 +29,7 @@ export default function Footer() {
                 justifyContent="justify-between"
                 w="full"
             >
-                <Flex>
+                <Flex display={{ base: 'none', md: 'block' }}>
                     <Text color="gray.500">
                         Copyright &copy; {new Date().getFullYear()}{' '}
                         <Link
@@ -37,6 +46,25 @@ export default function Footer() {
                 <Spacer w="full" />
 
                 <Flex color="slate.400" _dark={{ color: 'slate.500' }} gap={10}>
+                    <Link
+                        href="https://pse.dev"
+                        color="gray.500"
+                        _hover={{ color: 'gray.400' }}
+                        isExternal
+                        display={{ base: 'flex', md: 'none' }}
+                    >
+                        <span className="sr-only">PSE</span>
+                        <svg
+                            width="25"
+                            height="25"
+                            viewBox="0 0 144 143"
+                            fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path d="M144 80.4382C144 83.0334 142.142 85.1883 139.689 85.6865C139.338 85.756 138.976 85.7907 138.602 85.7907H120.574C117.583 85.7907 115.165 88.1889 115.165 91.1548V109.031C115.165 110.885 114.219 112.507 112.782 113.48C112.209 113.862 111.555 114.14 110.854 114.291C110.503 114.361 110.141 114.395 109.767 114.395H91.7394C88.7484 114.395 86.3299 116.794 86.3299 119.759V137.636C86.3299 140.602 83.9114 143 80.9204 143H62.8927C59.9017 143 57.4832 140.602 57.4832 137.636V119.759C57.4832 116.794 59.9017 114.395 62.8927 114.395H80.9204C83.9114 114.395 86.3299 111.997 86.3299 109.031V91.1548C86.3299 88.1889 88.7484 85.7907 91.7394 85.7907H109.767C112.758 85.7907 115.177 83.3925 115.177 80.4266V57.1861C115.177 41.4298 102.325 28.6394 86.4351 28.5931C70.5571 28.651 57.6935 41.4298 57.6935 57.1861V80.4266C57.6935 83.3925 55.275 85.7907 52.284 85.7907H34.2562C31.2652 85.7907 28.8467 88.1889 28.8467 91.1548V137.636C28.8467 140.602 26.4282 143 23.4372 143H5.40949C2.4185 143 0 140.602 0 137.636V91.1548C0 88.1889 2.4185 85.7907 5.40949 85.7907H23.4372C26.4282 85.7907 28.8467 83.3925 28.8467 80.4266V57.0818C28.8467 25.5576 54.6207 0 86.4234 0C118.226 0 144 25.5576 144 57.0934V80.4382Z" />
+                        </svg>
+                    </Link>
+
                     <Link
                         href="https://github.com/vivianjeng/anon-transfer"
                         color="gray.500"

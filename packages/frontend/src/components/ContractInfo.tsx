@@ -70,17 +70,21 @@ export default function ContractInfo() {
                 <Button
                     leftIcon={<EtherscanDarkIcon />}
                     onClick={handleClick}
-                    rightIcon={<ExternalLinkIcon />}
+                    // rightIcon={<ExternalLinkIcon />}
                 >
-                    View Contract
+                    <Text display={{ base: 'none', lg: 'block' }}>
+                        View Contract
+                    </Text>
                 </Button>
             ) : (
                 <Button
                     leftIcon={<EtherscanLightIcon />}
                     onClick={handleClick}
-                    rightIcon={<ExternalLinkIcon />}
+                    // rightIcon={<ExternalLinkIcon />}
                 >
-                    View Contract
+                    <Text display={{ base: 'none', lg: 'block' }}>
+                        View Contract
+                    </Text>
                 </Button>
             )}
         </HStack>
