@@ -24,7 +24,7 @@ export default function Home() {
             <VStack p={10} gap={5} w="full">
                 <Wallet />
             </VStack>
-            <Footer />
+            <Footer display={{ base: 'none', md: 'flex' }} />
         </ChakraProvider>
     )
 }

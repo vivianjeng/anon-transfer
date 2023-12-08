@@ -1,9 +1,27 @@
-import { HStack, Spacer, Text } from '@chakra-ui/react'
+import {
+    Button,
+    Divider,
+    Drawer,
+    DrawerBody,
+    DrawerCloseButton,
+    DrawerContent,
+    DrawerFooter,
+    DrawerOverlay,
+    HStack,
+    IconButton,
+    Spacer,
+    Text,
+    VStack,
+    useDisclosure,
+} from '@chakra-ui/react'
+import { HamburgerIcon } from '@chakra-ui/icons'
 import Signup from './Signup'
 import ContractInfo from './ContractInfo'
 import ColorMode from './ColorMode'
+import Footer from './Footer'
 
 export default function Header() {
+    const { isOpen, onOpen, onClose } = useDisclosure()
     return (
         <HStack
             zIndex="1"
@@ -38,9 +56,35 @@ export default function Header() {
                 Anon Transfer
             </Text>
             <Spacer />
+
             <ContractInfo />
-            <Signup />
+            <Signup display={{ base: 'none', md: 'flex' }} />
             <ColorMode />
+            <IconButton
+                // px="0 !important"
+                onClick={onOpen}
+                display={{ base: 'block', md: 'none' }}
+                aria-label="Menu"
+                // variant="unstyled"
+                icon={<HamburgerIcon boxSize="6" />}
+            />
+            <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+                <DrawerOverlay />
+                <DrawerContent>
+                    <DrawerCloseButton mt="25px" mr="21px" />
+
+                    <DrawerBody>
+                        <VStack spacing="8" mt="20">
+                            <Signup flexDirection="column" align="start" />
+                            <Button onClick={onClose}>close</Button>
+                        </VStack>
+                    </DrawerBody>
+
+                    <DrawerFooter mb="5" flexDirection="column">
+                        <Footer />
+                    </DrawerFooter>
+                </DrawerContent>
+            </Drawer>
         </HStack>
     )
 }

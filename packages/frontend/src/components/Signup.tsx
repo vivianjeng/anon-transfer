@@ -7,6 +7,9 @@ import {
     Text,
     IconButton,
     Tooltip,
+    Flex,
+    Box,
+    StackProps,
 } from '@chakra-ui/react'
 import { ViewOffIcon, ViewIcon } from '@chakra-ui/icons'
 import { ethers } from 'ethers'
@@ -24,7 +27,7 @@ declare global {
     }
 }
 
-export default function Signup() {
+export default function Signup({ ...props }: StackProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [isDisabled, setIsDisabled] = useState(false)
     const [show, setShow] = useState(false)
@@ -172,7 +175,7 @@ export default function Signup() {
         }
     }
     return (
-        <HStack>
+        <HStack {...props}>
             {isDisabled ? (
                 <>
                     <Text>
