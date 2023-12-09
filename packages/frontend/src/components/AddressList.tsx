@@ -123,7 +123,12 @@ export default function AddressList() {
             }, 3000)
             return () => clearTimeout(timeout)
         }
-    }, [window.localStorage.getItem('userId'), isOpen])
+    }, [
+        typeof window !== 'undefined'
+            ? window.localStorage.getItem('userId')
+            : undefined,
+        isOpen,
+    ])
 
     return (
         <CardComponent>
@@ -137,10 +142,13 @@ export default function AddressList() {
                         key={index}
                         address={address}
                         disabled={
+                            typeof window !== 'undefined' &&
                             epoch !==
-                            Number(
-                                window.localStorage.getItem('transitionEpoch')
-                            )
+                                Number(
+                                    window.localStorage.getItem(
+                                        'transitionEpoch'
+                                    )
+                                )
                         }
                         w="full"
                     />
@@ -149,7 +157,11 @@ export default function AddressList() {
                 colorScheme="blue"
                 onClick={transition}
                 isLoading={isLoading}
-                isDisabled={epoch === Number(window.localStorage.getItem('transitionEpoch'))}
+                isDisabled={
+                    typeof window !== 'undefined' &&
+                    epoch ===
+                        Number(window.localStorage.getItem('transitionEpoch'))
+                }
                 rightIcon={<SettingsIcon />}
             >
                 Transition

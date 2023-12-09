@@ -6,6 +6,7 @@ import {
     Flex,
     HStack,
     Input,
+    Link,
     Spacer,
     Text,
     VStack,
@@ -28,6 +29,8 @@ declare global {
         ethereum?: any
     }
 }
+
+const MAX_VALUE = ((BigInt(1) << BigInt(64)) - BigInt(1)).toString()
 
 export default function Withdraw() {
     const { isOpen, onToggle } = useDisclosure()
@@ -110,7 +113,7 @@ export default function Withdraw() {
             await userState.waitForSync()
             const { publicSignals, proof } =
                 await userState.genProveReputationProof({
-                    minRep: Number(value),
+                    minRep: value as any,
                     revealNonce,
                     epkNonce,
                     data: sigData,
@@ -196,6 +199,17 @@ export default function Withdraw() {
                 <Box>Pending balance: {pending} wei</Box>
                 <Spacer />
                 <Box>Withdrawable balance: {balance} wei</Box>
+                <Spacer />
+                <Box textColor="red">
+                    Max withdrawable capacity: {MAX_VALUE} wei{' '}
+                    <Link
+                        textColor="currentcolor"
+                        isExternal
+                        href="https://github.com/vivianjeng/anon-transfer/issues/8"
+                    >
+                        (See issue#8)
+                    </Link>
+                </Box>
             </HStack>
             <HStack w="full">
                 <Text w="250px">Input an ETH address:</Text>
