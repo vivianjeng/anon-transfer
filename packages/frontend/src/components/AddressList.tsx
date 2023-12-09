@@ -27,13 +27,16 @@ export default function AddressList() {
     const { epoch, signIn } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [txHash, setTxHash] = useState('')
-    const [epochKeys, setEpochKeys] = useState<string[]>(['', '', ''])
+    const [epochKeys, setEpochKeys] = useState<string[]>([])
     const { userTransition } = useUnirepUser()
     const { connect } = useMetamask()
 
     const getData = () => {
         try {
-            if (!window.localStorage.getItem('userId')) return
+            if (!window.localStorage.getItem('userId')) {
+                setEpochKeys(new Array(3).fill('0x'))
+                return
+            }
             const id = new Identity(window.localStorage.getItem('userId'))
             const epks = new Array(3)
                 .fill(0)
@@ -92,23 +95,20 @@ export default function AddressList() {
             <Text fontSize="2xl" w="full">
                 My private addresses:
             </Text>
-            {signIn &&
-                epochKeys.map((address, index) => (
-                    <CopyAddress
-                        key={index}
-                        address={address}
-                        disabled={
-                            typeof window !== 'undefined' &&
-                            epoch !==
-                                Number(
-                                    window.localStorage.getItem(
-                                        'transitionEpoch'
-                                    )
-                                )
-                        }
-                        w="full"
-                    />
-                ))}
+            {epochKeys.map((address, index) => (
+                <CopyAddress
+                    key={index}
+                    address={address}
+                    disabled={
+                        typeof window !== 'undefined' &&
+                        epoch !==
+                            Number(
+                                window.localStorage.getItem('transitionEpoch')
+                            )
+                    }
+                    w="full"
+                />
+            ))}
             <Button
                 colorScheme="blue"
                 onClick={transition}

@@ -34,7 +34,7 @@ export default function Transaction({
                         bgColor="green"
                         rounded={8}
                     >
-                        <AlertIcon opacity="1" />
+                        <AlertIcon opacity="1" color="white" />
                         <Link
                             href={`https://sepolia.etherscan.io/tx/${txHash}`}
                         >

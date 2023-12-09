@@ -16,6 +16,7 @@ import {
     ModalBody,
     ModalCloseButton,
     ButtonGroup,
+    Flex,
 } from '@chakra-ui/react'
 import { JsonRpcSigner } from '@ethersproject/providers'
 import { ViewOffIcon, ViewIcon } from '@chakra-ui/icons'
@@ -107,7 +108,9 @@ export default function Signup({ ...props }: StackProps) {
     }
     return (
         <>
-            <Transaction isOpen={isOpen} txHash={txHash} />
+            <Flex justifyContent="center" w="full" position="fixed">
+                <Transaction isOpen={isOpen} txHash={txHash} />
+            </Flex>
             <HStack {...props}>
                 {isDisabled ? (
                     <>
@@ -130,7 +133,7 @@ export default function Signup({ ...props }: StackProps) {
                         colorScheme="blue"
                         onClick={() => setIsModalOpen(true)}
                     >
-                        Connect
+                        Log In
                     </Button>
                 )}
                 <Modal
@@ -139,7 +142,7 @@ export default function Signup({ ...props }: StackProps) {
                 >
                     <ModalOverlay />
 
-                    <ModalContent p={5}>
+                    <ModalContent p={5} ml="20px" mr="20px">
                         <ModalHeader p={6} alignItems={'center'}>
                             {' '}
                             Login{' '}

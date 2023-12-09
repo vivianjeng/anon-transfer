@@ -54,7 +54,12 @@ export default function CopyAddress({
             >
                 <Tooltip
                     placement="auto"
-                    label="Transition is required."
+                    label={
+                        typeof window !== 'undefined' &&
+                        window.localStorage.getItem('userId') !== null
+                            ? 'Transition is required.'
+                            : 'Please log in first.'
+                    }
                     isDisabled={!disabled}
                 >
                     {hasCopied ? 'copied!' : 'copy'}
