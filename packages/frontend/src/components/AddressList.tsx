@@ -123,7 +123,7 @@ export default function AddressList() {
             }, 3000)
             return () => clearTimeout(timeout)
         }
-    }, [])
+    }, [window.localStorage.getItem('userId'), isOpen])
 
     return (
         <CardComponent>
@@ -149,6 +149,7 @@ export default function AddressList() {
                 colorScheme="blue"
                 onClick={transition}
                 isLoading={isLoading}
+                isDisabled={epoch === Number(window.localStorage.getItem('transitionEpoch'))}
                 rightIcon={<SettingsIcon />}
             >
                 Transition

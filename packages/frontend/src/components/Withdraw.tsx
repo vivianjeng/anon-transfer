@@ -184,7 +184,7 @@ export default function Withdraw() {
             return () => clearTimeout(timeout)
         }
         getData()
-    }, [])
+    }, [isOpen])
 
     return (
         <CardComponent>
