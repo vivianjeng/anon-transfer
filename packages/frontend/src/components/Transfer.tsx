@@ -1,46 +1,21 @@
 'use client'
 import { ethers } from 'ethers'
-import {
-    Alert,
-    AlertDialog,
-    AlertIcon,
-    Box,
-    Button,
-    Flex,
-    HStack,
-    Input,
-    Link,
-    Progress,
-    SlideFade,
-    Spacer,
-    Text,
-    VStack,
-    useDisclosure,
-} from '@chakra-ui/react'
-import {
-    ArrowForwardIcon,
-    CheckCircleIcon,
-    ExternalLinkIcon,
-} from '@chakra-ui/icons'
+import { Button, HStack, Input, Text, useDisclosure } from '@chakra-ui/react'
+import { ArrowForwardIcon } from '@chakra-ui/icons'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import { SetStateAction, useEffect, useState } from 'react'
-import { appAddress, chainId, useGlobalContext } from '@/contexts/User'
+import { appAddress } from '@/contexts/User'
 import CardComponent from './Card'
 import Transaction from './Transaction'
-
-declare global {
-    interface Window {
-        ethereum?: any
-    }
-}
+import { useMetamask } from '@/hooks/Metamask'
 
 export default function Transfer() {
     const { isOpen, onToggle } = useDisclosure()
-    const { address, setAddress } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [privateAddress, setPrivateAddress] = useState('')
     const [value, setValue] = useState('')
     const [txHash, setTxHash] = useState('')
+    const { connect } = useMetamask()
     const handlePrivateAddressChange = (event: {
         target: { value: SetStateAction<string> }
     }) => setPrivateAddress(event.target.value)
@@ -55,41 +30,19 @@ export default function Transfer() {
                 privateAddress,
             ])
             const hexValue = '0x' + BigInt(value).toString(16)
-            let connectedAddress = address
-            if (address === '') {
-                const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts',
-                })
-                connectedAddress = accounts[0]
-                setAddress(accounts[0])
-            }
-
-            const currentChainId = await window.ethereum.request({
-                method: 'eth_chainId',
-                params: [],
-            })
-
-            if (BigInt(currentChainId) !== BigInt(chainId)) {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [
-                        {
-                            chainId: chainId,
-                        },
-                    ],
-                })
-            }
-            const tx = await window.ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [
-                    {
-                        from: connectedAddress,
-                        to: appAddress,
-                        value: hexValue,
-                        data: data,
-                    },
-                ],
-            })
+            const signer = await connect()
+            const params = [
+                {
+                    from: await signer.getAddress(),
+                    to: appAddress,
+                    value: hexValue,
+                    data: data,
+                },
+            ]
+            const tx = await signer?.provider.send(
+                'eth_sendTransaction',
+                params
+            )
             setTxHash(tx)
             onToggle()
         } catch (err: any) {

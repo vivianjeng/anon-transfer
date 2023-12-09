@@ -5,12 +5,6 @@ import Header from '@/components/Header'
 import Wallet from '@/components/Wallet'
 import { ChakraProvider, VStack, extendTheme } from '@chakra-ui/react'
 
-declare global {
-    interface Window {
-        ethereum?: any
-    }
-}
-
 const theme = extendTheme({
     config: {
         useSystemColorMode: true,

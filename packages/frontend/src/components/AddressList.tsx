@@ -9,6 +9,7 @@ import prover from '@unirep/circuits/provers/web'
 import { UserState } from '@unirep/core'
 import { ethers } from 'ethers'
 import abi from '@unirep/contracts/abi/Unirep.json'
+import { JsonRpcSigner } from '@ethersproject/providers'
 import {
     appAddress,
     chainId,
@@ -18,20 +19,17 @@ import {
 } from '@/contexts/User'
 import CardComponent from './Card'
 import Transaction from './Transaction'
-
-declare global {
-    interface Window {
-        ethereum?: any
-    }
-}
+import { useUnirepUser } from '@/hooks/User'
+import { useMetamask } from '@/hooks/Metamask'
 
 export default function AddressList() {
     const { isOpen, onToggle } = useDisclosure()
-    const { address, setAddress, epoch, setEpoch, signIn } = useGlobalContext()
-    const [transitionEpoch, setTransitionEpoch] = useState(0)
+    const { epoch, signIn } = useGlobalContext()
     const [isLoading, setIsLoading] = useState(false)
     const [txHash, setTxHash] = useState('')
     const [epochKeys, setEpochKeys] = useState<string[]>(['', '', ''])
+    const { userTransition } = useUnirepUser()
+    const { connect } = useMetamask()
 
     const getData = () => {
         try {
@@ -59,64 +57,10 @@ export default function AddressList() {
     const transition = async () => {
         setIsLoading(true)
         try {
-            let connectedAddress = address
-            if (address === '') {
-                const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts',
-                })
-                connectedAddress = accounts[0]
-                setAddress(accounts[0])
-            }
-            const currentChainId = await window.ethereum.request({
-                method: 'eth_chainId',
-                params: [],
-            })
-
-            if (BigInt(currentChainId) !== BigInt(chainId)) {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [
-                        {
-                            chainId: chainId,
-                        },
-                    ],
-                })
-            }
-
-            const provider = new ethers.providers.Web3Provider(window?.ethereum)
-            const unirep = new ethers.Contract(unirepAddress, abi, provider)
-            if (!window.localStorage.getItem('userId')) return
+            const signer = await connect()
             const id = new Identity(window.localStorage.getItem('userId'))
-            const userState = new UserState({
-                id: id,
-                prover: prover,
-                provider: provider,
-                attesterId: BigInt(appAddress),
-                unirepAddress: unirepAddress,
-            })
-            await userState.start()
-            await userState.waitForSync()
-            const { publicSignals, proof, toEpoch } =
-                await userState.genUserStateTransitionProof()
-            const data = unirep.interface.encodeFunctionData(
-                'userStateTransition',
-                [publicSignals, proof]
-            )
-            const tx = await window.ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [
-                    {
-                        from: connectedAddress,
-                        to: unirepAddress,
-                        data: data,
-                    },
-                ],
-            })
+            const tx = await userTransition(id, signer as JsonRpcSigner)
             setTxHash(tx)
-            onToggle()
-            window.localStorage.setItem('transitionEpoch', toEpoch.toString())
-            setTransitionEpoch(Number(toEpoch))
-            userState.stop()
         } catch (err: any) {
             window.alert(err.message)
         } finally {
@@ -129,10 +73,6 @@ export default function AddressList() {
 
     useEffect(() => {
         getData()
-        if (window.localStorage.getItem('transitionEpoch'))
-            setTransitionEpoch(
-                Number(window.localStorage.getItem('transitionEpoch'))
-            )
         if (isOpen) {
             const timeout = setTimeout(() => {
                 onToggle()
