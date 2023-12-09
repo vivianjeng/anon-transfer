@@ -47,7 +47,7 @@ export default function AddressList() {
                             appAddress,
                             culcEpoch(),
                             i,
-                            chainId
+                            BigInt(chainId)
                         ).toString(16)
                 )
             setEpochKeys(epks)
@@ -67,6 +67,22 @@ export default function AddressList() {
                 connectedAddress = accounts[0]
                 setAddress(accounts[0])
             }
+            const currentChainId = await window.ethereum.request({
+                method: 'eth_chainId',
+                params: [],
+            })
+
+            if (BigInt(currentChainId) !== BigInt(chainId)) {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [
+                        {
+                            chainId: chainId,
+                        },
+                    ],
+                })
+            }
+
             const provider = new ethers.providers.Web3Provider(window?.ethereum)
             const unirep = new ethers.Contract(unirepAddress, abi, provider)
             if (!window.localStorage.getItem('userId')) return

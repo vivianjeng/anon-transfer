@@ -30,7 +30,7 @@ const GlobalContext = createContext<ContextProps>({
 
 const startTimestamp = 1701792432
 const epochLength = 300
-export const chainId = 11155111
+export const chainId = '0xaa36a7'
 // export const chainId = 31337
 export const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
 export const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'

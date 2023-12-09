@@ -24,7 +24,7 @@ import {
 } from '@chakra-ui/icons'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import { SetStateAction, useEffect, useState } from 'react'
-import { appAddress, useGlobalContext } from '@/contexts/User'
+import { appAddress, chainId, useGlobalContext } from '@/contexts/User'
 import CardComponent from './Card'
 import Transaction from './Transaction'
 
@@ -62,6 +62,22 @@ export default function Transfer() {
                 })
                 connectedAddress = accounts[0]
                 setAddress(accounts[0])
+            }
+
+            const currentChainId = await window.ethereum.request({
+                method: 'eth_chainId',
+                params: [],
+            })
+
+            if (BigInt(currentChainId) !== BigInt(chainId)) {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [
+                        {
+                            chainId: chainId,
+                        },
+                    ],
+                })
             }
             const tx = await window.ethereum.request({
                 method: 'eth_sendTransaction',

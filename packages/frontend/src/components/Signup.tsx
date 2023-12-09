@@ -153,6 +153,23 @@ export default function Signup({ ...props }: StackProps) {
                     })
                     setAddress(accounts[0])
                 }
+
+                const currentChainId = await window.ethereum.request({
+                    method: 'eth_chainId',
+                    params: [],
+                })
+
+                if (BigInt(currentChainId) !== BigInt(chainId)) {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [
+                            {
+                                chainId: chainId,
+                            },
+                        ],
+                    })
+                }
+
                 const provider = new ethers.providers.Web3Provider(
                     window.ethereum
                 )

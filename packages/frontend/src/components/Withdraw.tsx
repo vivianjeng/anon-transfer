@@ -20,7 +20,12 @@ import prover from '@unirep/circuits/provers/web'
 import { SetStateAction, useEffect, useState } from 'react'
 import unirepAbi from '@unirep/contracts/abi/Unirep.json'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
-import { useGlobalContext, unirepAddress, appAddress } from '@/contexts/User'
+import {
+    useGlobalContext,
+    unirepAddress,
+    appAddress,
+    chainId,
+} from '@/contexts/User'
 import CardComponent from './Card'
 import Transaction from './Transaction'
 
@@ -60,6 +65,22 @@ export default function Withdraw() {
                 })
                 connectedAddress = accounts[0]
                 setAddress(accounts[0])
+            }
+
+            const currentChainId = await window.ethereum.request({
+                method: 'eth_chainId',
+                params: [],
+            })
+
+            if (BigInt(currentChainId) !== BigInt(chainId)) {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [
+                        {
+                            chainId: chainId,
+                        },
+                    ],
+                })
             }
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const unirep = new ethers.Contract(
