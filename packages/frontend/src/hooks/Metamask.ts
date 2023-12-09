@@ -2,7 +2,6 @@ import * as ethers from 'ethers'
 import {
     ExternalProvider,
     JsonRpcSigner,
-    Network,
     Web3Provider,
 } from '@ethersproject/providers'
 import { useState } from 'react'
@@ -31,9 +30,7 @@ interface ProviderRpcError extends Error {
 export function useMetamask() {
     const [provider, setProvider] = useState<Web3Provider | null>(null)
     const [signer, setSigner] = useState<JsonRpcSigner | null>(null)
-    const [chain, setChain] = useState<string | null>(null)
     const [accounts, setAccounts] = useState<string[]>([])
-    const [network, setNetwork] = useState<Network | null>(null)
 
     const setupProvider = () => {
         if (!window.ethereum) throw Error('Could not find Metamask extension')
@@ -54,12 +51,6 @@ export function useMetamask() {
             }
         )
         ;(window.ethereum as GenericProvider).on(
-            'networkChanged',
-            async (net: number) => {
-                console.log('networkChanged', net)
-            }
-        )
-        ;(window.ethereum as GenericProvider).on(
             'disconnect',
             (error: ProviderRpcError) => {
                 throw Error(error.message)
@@ -67,9 +58,7 @@ export function useMetamask() {
         )
         ;(window.ethereum as GenericProvider).on(
             'chainChanged',
-            (chain: string) => {
-                setChain(chain as string)
-            }
+            (chainId: string) => window.location.reload()
         )
     }
 
@@ -79,9 +68,9 @@ export function useMetamask() {
             'eth_requestAccounts',
             []
         )
-        const network: Network = await provider.getNetwork()
+        const network = await provider.getNetwork()
         const signer: JsonRpcSigner = provider.getSigner()
-        if (BigInt(chain ?? 0) !== BigInt(chainId)) {
+        if (BigInt(network.chainId ?? 0) !== BigInt(chainId)) {
             const params = [
                 {
                     chainId: chainId,
@@ -89,7 +78,6 @@ export function useMetamask() {
             ]
             await provider.send('wallet_switchEthereumChain', params)
         }
-        setNetwork(network)
         setAccounts(accounts)
         setSigner(signer)
         return signer
@@ -125,11 +113,8 @@ export function useMetamask() {
     }
 
     return {
-        provider,
         signer,
         accounts,
-        chain,
-        network,
         connect,
         getAccounts,
         sendTransaction,
