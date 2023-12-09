@@ -58,7 +58,10 @@ export function useMetamask() {
         )
         ;(window.ethereum as GenericProvider).on(
             'chainChanged',
-            (chainId: string) => window.location.reload()
+            (chainId: string) => {
+                console.log('chainChanged', chainId)
+                window.location.reload()
+            }
         )
     }
 

@@ -61,11 +61,6 @@ contract AnonTransfer {
             signals.data == uint(uint160(address(recipient))),
             'should specific recipient'
         );
-        uint160 attesterId = uint160(address(this));
-        require(
-            signals.epoch == unirep.attesterCurrentEpoch(attesterId),
-            'should withdraw in current epoch'
-        );
         recipient.transfer(amount);
         unirep.attest(epochKey, signals.epoch, withdrawIndex, amount);
         withdrawnEpochKey[epochKey] = true;

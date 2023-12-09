@@ -3,17 +3,17 @@ import {
     Box,
     Button,
     HStack,
+    IconButton,
     Input,
     Link,
     Spacer,
     Text,
     useDisclosure,
 } from '@chakra-ui/react'
-import { UnlockIcon } from '@chakra-ui/icons'
+import { RepeatIcon, UnlockIcon } from '@chakra-ui/icons'
 const { Identity } = require('@semaphore-protocol/identity')
 import { SetStateAction, useEffect, useState } from 'react'
 import { JsonRpcSigner } from '@ethersproject/providers'
-import { culcEpoch } from '@/contexts/User'
 import CardComponent from './Card'
 import Transaction from './Transaction'
 import { useMetamask } from '@/hooks/Metamask'
@@ -25,13 +25,14 @@ export default function Withdraw() {
     const { isOpen, onToggle } = useDisclosure()
     const [txHash, setTxHash] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [isLoadingData, setIsLoadingData] = useState(false)
     const [ETHAddress, setETHAddress] = useState('')
     const [value, setValue] = useState('')
     // TODO: getData to compute balance
     const [pending, setPending] = useState('0')
     const [balance, setBalance] = useState('0')
     const { connect } = useMetamask()
-    const { userTransition, userWithdraw, getUserData } = useUnirepUser()
+    const { userWithdraw, getUserData } = useUnirepUser()
     const handleETHAddressChange = (event: {
         target: { value: SetStateAction<string> }
     }) => setETHAddress(event.target.value)
@@ -44,15 +45,6 @@ export default function Withdraw() {
         try {
             const signer = await connect()
             const id = new Identity(window.localStorage.getItem('userId'))
-            if (
-                culcEpoch() !==
-                Number(window.localStorage.getItem('transitionEpoch'))
-            ) {
-                const tx = await userTransition(id, signer as JsonRpcSigner)
-                setTxHash(tx)
-                onToggle()
-                await signer.provider.waitForTransaction(tx)
-            }
             const tx = await userWithdraw(
                 id,
                 signer as JsonRpcSigner,
@@ -74,6 +66,7 @@ export default function Withdraw() {
     }
 
     const getData = async () => {
+        setIsLoadingData(true)
         try {
             if (!window.localStorage.getItem('userId')) return
             const signer = await connect()
@@ -86,6 +79,8 @@ export default function Withdraw() {
             setPending(latestData)
         } catch (err: any) {
             window.alert(err.message)
+        } finally {
+            setIsLoadingData(false)
         }
     }
 
@@ -96,7 +91,6 @@ export default function Withdraw() {
             }, 3000)
             return () => clearTimeout(timeout)
         }
-        getData()
     }, [isOpen])
 
     return (
@@ -106,12 +100,19 @@ export default function Withdraw() {
                 Withdraw
             </Text>
             <HStack>
+                <IconButton
+                    isLoading={isLoadingData}
+                    aria-label="refresh"
+                    icon={<RepeatIcon />}
+                    onClick={getData}
+                    variant="outline"
+                ></IconButton>
                 <Box>Next epoch balance: {pending} wei</Box>
                 <Spacer />
                 <Box>Current epoch balance: {balance} wei</Box>
                 <Spacer />
                 <Box textColor="red">
-                    Max withdrawable capacity: {MAX_VALUE} wei{' '}
+                    Max withdrawable wei: {MAX_VALUE} wei{' '}
                     <Link
                         textColor="currentcolor"
                         isExternal
