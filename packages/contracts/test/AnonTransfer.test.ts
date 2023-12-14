@@ -36,7 +36,7 @@ describe('Anon Transfer', function () {
     // generate random user id
     const id = new Identity()
     // user balance
-    let balance = 0
+    let balance = BigInt(0)
 
     it('deployment', async function () {
         const [signer] = await ethers.getSigners()
@@ -69,7 +69,7 @@ describe('Anon Transfer', function () {
             const userState = await genUserState(id, app)
             const epoch = 0
             const nonce = i
-            const wei = 100000 + i * 3000
+            const gwei = 100000 + i * 3000
             const epochKey = userState.getEpochKeys(
                 epoch,
                 nonce,
@@ -77,20 +77,42 @@ describe('Anon Transfer', function () {
             ) as bigint
             await app
                 .connect(sender)
-                .transfer(epochKey, { value: wei })
+                .transfer(epochKey, {
+                    value: ethers.utils.parseUnits(gwei.toString(), 'gwei'),
+                })
                 .then((t) => t.wait())
             console.log(`sender of the transaction: ${sender.address}`)
-            console.log(`transfer ${wei} Wei to private address ${epochKey}`)
+            console.log(`transfer ${gwei} gwei to private address ${epochKey}`)
 
             // check user balance
-            balance += wei
+            balance += BigInt(gwei)
             await userState.waitForSync()
             const data = await userState.getData()
             expect(data[0].toString()).to.equal(balance.toString())
-            console.log('user 1 balance:', balance)
+            console.log('user 1 balance in gwei:', balance.toString())
             userState.stop()
             console.log('-----------------------------------------------')
         }
+    })
+
+    it('cannot transfer with value that is not gwei value', async () => {
+        const accounts = await ethers.getSigners()
+        const sender = accounts[2]
+        const userState = await genUserState(id, app)
+        const epoch = 0
+        const nonce = 0
+        const wei = 100000
+        const epochKey = userState.getEpochKeys(
+            epoch,
+            nonce,
+            app.address
+        ) as bigint
+        await expect(
+            app
+                .connect(sender)
+                .transfer(epochKey, { value: wei })
+                .then((t) => t.wait())
+        ).to.be.revertedWith('gweiValue should be multiple of 1e9')
     })
 
     it('user state transition', async () => {
@@ -110,34 +132,39 @@ describe('Anon Transfer', function () {
     })
 
     it('withdraw', async () => {
+        const accounts = await ethers.getSigners()
+        const sender = accounts[10]
         const wallet = ethers.Wallet.createRandom()
         const balance0 = await ethers.provider.getBalance(wallet.address)
         expect(balance0.toString()).to.equal('0')
         const userState = await genUserState(id, app)
-        const withdrawAmount = 200000
+        const withdrawGwei = 200000
         const revealNonce = true
         const epkNonce = 0
         const sigData = wallet.address
         const { publicSignals, proof } =
             await userState.genProveReputationProof({
-                minRep: withdrawAmount,
+                minRep: withdrawGwei,
                 revealNonce,
                 epkNonce,
                 data: sigData,
             })
-        await app.withdraw(wallet.address, publicSignals, proof)
+        await app.connect(sender).withdraw(wallet.address, publicSignals, proof)
         const balance1 = await ethers.provider.getBalance(wallet.address)
-        expect(balance1.toString()).to.equal(withdrawAmount.toString())
+        expect(balance1.toString()).to.equal(
+            ethers.utils.parseUnits(withdrawGwei.toString(), 'gwei')
+        )
+        console.log(`sender of the transaction: ${sender.address}`)
         console.log(
-            `withdraw amount ${withdrawAmount} Wei to wallet with address ${wallet.address}`
+            `withdraw amount ${withdrawGwei} gwei to wallet with address ${wallet.address}`
         )
 
         // check user balance
-        balance -= withdrawAmount
+        balance -= BigInt(withdrawGwei)
         await userState.waitForSync()
         const data = await userState.getData()
         expect((data[0] - data[1]).toString()).to.equal(balance.toString())
-        console.log('user 1 balance:', balance)
+        console.log('user 1 balance in gwei:', balance)
         userState.stop()
     })
 
@@ -146,13 +173,13 @@ describe('Anon Transfer', function () {
         const balance0 = await ethers.provider.getBalance(wallet.address)
         expect(balance0.toString()).to.equal('0')
         const userState = await genUserState(id, app)
-        const withdrawAmount = 200000
+        const withdrawGwei = 200000
         const revealNonce = true
         const epkNonce = 0
         const sigData = wallet.address
         const { publicSignals, proof } =
             await userState.genProveReputationProof({
-                minRep: withdrawAmount,
+                minRep: withdrawGwei,
                 revealNonce,
                 epkNonce,
                 data: sigData,
@@ -194,7 +221,7 @@ describe('Anon Transfer', function () {
         const data = await userState.getProvableData()
         const minRep = data[0] - data[1]
         expect(minRep.toString()).to.equal(balance.toString())
-        console.log('user 1 balance:', balance)
+        console.log('user 1 balance in gwei:', balance.toString())
 
         // success
         await userState.genProveReputationProof({

@@ -38,7 +38,10 @@ contract AnonTransfer {
 
     function transfer(uint epochKey) public payable {
         uint48 epoch = unirep.attesterCurrentEpoch(uint160(address(this)));
-        unirep.attest(epochKey, epoch, depositIndex, msg.value);
+        uint gweiValue = msg.value;
+        require(gweiValue % 1e9 == 0, 'gweiValue should be multiple of 1e9');
+
+        unirep.attest(epochKey, epoch, depositIndex, gweiValue / 1e9);
     }
 
     function withdraw(
@@ -61,7 +64,7 @@ contract AnonTransfer {
             signals.data == uint(uint160(address(recipient))),
             'should specific recipient'
         );
-        recipient.transfer(amount);
+        recipient.transfer(amount * 1e9);
         unirep.attest(epochKey, signals.epoch, withdrawIndex, amount);
         withdrawnEpochKey[epochKey] = true;
     }
