@@ -37,6 +37,7 @@ export default function Transaction({
                         <AlertIcon opacity="1" color="white" />
                         <Link
                             href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                            isExternal
                         >
                             <Flex>
                                 <Text>Transaction submitted </Text>

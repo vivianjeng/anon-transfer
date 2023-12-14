@@ -1,5 +1,4 @@
 'use client'
-import ContractInfo from '@/components/ContractInfo'
 import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import Wallet from '@/components/Wallet'

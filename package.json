@@ -9,7 +9,7 @@
     ],
     "scripts": {
         "install": "lerna bootstrap",
-        "build": "lerna run build",
+        "build": "lerna run build && yarn lint:fix",
         "contracts": "yarn workspace @anon-transfer/contracts run",
         "frontend": "yarn workspace @anon-transfer/frontend run",
         "start": "node scripts/start.mjs",

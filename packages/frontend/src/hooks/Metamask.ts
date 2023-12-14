@@ -60,7 +60,8 @@ export function useMetamask() {
             'chainChanged',
             (chainId: string) => {
                 console.log('chainChanged', chainId)
-                window.location.reload()
+                const newProvider = new Web3Provider(window.ethereum)
+                setProvider(newProvider)
             }
         )
     }
@@ -74,12 +75,13 @@ export function useMetamask() {
         const network = await provider.getNetwork()
         const signer: JsonRpcSigner = provider.getSigner()
         if (BigInt(network.chainId ?? 0) !== BigInt(chainId)) {
+            const newProvider = setupProvider()
             const params = [
                 {
                     chainId: chainId,
                 },
             ]
-            await provider.send('wallet_switchEthereumChain', params)
+            await newProvider.send('wallet_switchEthereumChain', params)
         }
         setAccounts(accounts)
         setSigner(signer)
