@@ -67,22 +67,22 @@ export function useMetamask() {
     }
 
     const connect = async () => {
-        const provider = setupProvider()
-        const accounts: string[] = await provider.send(
+        let currentProvider = setupProvider()
+        const accounts: string[] = await currentProvider.send(
             'eth_requestAccounts',
             []
         )
-        const network = await provider.getNetwork()
-        const signer: JsonRpcSigner = provider.getSigner()
+        const network = await currentProvider.getNetwork()
         if (BigInt(network.chainId ?? 0) !== BigInt(chainId)) {
-            const newProvider = setupProvider()
             const params = [
                 {
                     chainId: chainId,
                 },
             ]
-            await newProvider.send('wallet_switchEthereumChain', params)
+            await currentProvider.send('wallet_switchEthereumChain', params)
+            currentProvider = setupProvider()
         }
+        const signer: JsonRpcSigner = currentProvider.getSigner()
         setAccounts(accounts)
         setSigner(signer)
         return signer

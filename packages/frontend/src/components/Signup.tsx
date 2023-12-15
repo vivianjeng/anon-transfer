@@ -38,7 +38,7 @@ export default function Signup({ ...props }: StackProps) {
     const [password, setPassword] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false)
     const { connect } = useMetamask()
-    const { userSignup } = useUnirepUser()
+    const { userSignup, userSignIn } = useUnirepUser()
 
     const handleClick = () => setShow(!show)
     const handleEmailChange = (event: { target: { value: string } }) =>
@@ -90,11 +90,13 @@ export default function Signup({ ...props }: StackProps) {
                 const tx = await userSignup(id, currentSigner as JsonRpcSigner)
                 setTxHash(tx)
                 onToggle()
+            } else {
+                const currentSigner = await connect()
+                await userSignIn(id, currentSigner as JsonRpcSigner)
             }
             window.localStorage.setItem('email', email)
             window.localStorage.setItem('password', password)
             window.localStorage.setItem('userId', secret)
-            // TODO: set transtition epoch after signin
             setIsDisabled(true)
             setSignIn(true)
             setIsModalOpen(false)
