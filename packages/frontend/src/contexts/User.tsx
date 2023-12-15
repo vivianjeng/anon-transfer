@@ -27,22 +27,31 @@ const GlobalContext = createContext<ContextProps>({
     setEpoch: (): number => 0,
 })
 
-const startTimestamp = 1701792432
-const epochLength = 300
-export const chainId = '0xaa36a7'
-// export const chainId = '0x7a69'
 export const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
-export const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
-// export const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
+// testnet
+// export const chainId = '0x7a69'
+// export const appAddress = '0x0B306BF915C4d645ff596e518fAf3F9669b97016'
+// const startTimestamp = 1702604943
+// const epochLength = 300
+// v1
+// export const chainId = '0xaa36a7'
+// export const appAddress = '0xd1A79ed12B26bD12247536869d75E1A8555aF35F'
+// const startTimestamp = 1701792432
+// const epochLength = 300
+// v2
+export const chainId = '0xaa36a7'
+export const appAddress = '0x7b485d3a3De5009BfCB435D275594C86370079f4'
+const startTimestamp = 1702536036
+const epochLength = 600
 
-export function culcEpoch() {
+export function calcEpoch() {
     const timestamp = Math.floor(+new Date() / 1000)
     return Math.max(0, Math.floor((timestamp - startTimestamp) / epochLength))
 }
 
 export function remainingTime() {
     const timestamp = Math.floor(+new Date() / 1000)
-    const currentEpoch = culcEpoch()
+    const currentEpoch = calcEpoch()
     const epochEnd = startTimestamp + (currentEpoch + 1) * epochLength
     return Math.max(0, epochEnd - timestamp)
 }

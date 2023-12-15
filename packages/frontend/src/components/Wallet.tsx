@@ -7,7 +7,7 @@ import { useEffect } from 'react'
 import AddressList from './AddressList'
 import Transfer from './Transfer'
 import Withdraw from './Withdraw'
-import { culcEpoch, remainingTime, useGlobalContext } from '@/contexts/User'
+import { calcEpoch, remainingTime, useGlobalContext } from '@/contexts/User'
 
 export default function Wallet() {
     const { epoch, setEpoch } = useGlobalContext()
@@ -15,7 +15,7 @@ export default function Wallet() {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setEpoch(culcEpoch())
+            setEpoch(calcEpoch())
             setRemaining(remainingTime())
         }, 1000)
 

@@ -29,7 +29,9 @@ export default function Transfer() {
             const data = app.interface.encodeFunctionData('transfer', [
                 privateAddress,
             ])
-            const hexValue = '0x' + BigInt(value).toString(16)
+            const hexValue = ethers.utils
+                .parseUnits(BigInt(value).toString(), 'gwei')
+                .toHexString()
             const signer = await connect()
             const params = [
                 {
@@ -84,7 +86,7 @@ export default function Transfer() {
                 />
             </HStack>
             <HStack w="full">
-                <Text w="250px">Input the amount of wei: </Text>
+                <Text w="250px">Input the amount of gwei: </Text>
                 <Input
                     value={value}
                     onChange={handleValueChange}

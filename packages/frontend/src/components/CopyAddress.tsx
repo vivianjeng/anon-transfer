@@ -1,5 +1,5 @@
 'use client'
-import { useGlobalContext } from '@/contexts/User'
+import { remainingTime, useGlobalContext } from '@/contexts/User'
 import {
     Button,
     HStack,
@@ -30,6 +30,12 @@ export default function CopyAddress({
     function handleCopy() {
         onCopy()
         onOpen()
+    }
+
+    function calcDate() {
+        const timestamp = +new Date() + remainingTime() * 1000
+        const date = new Date(timestamp)
+        return date.toLocaleString()
     }
 
     return (
@@ -67,7 +73,7 @@ export default function CopyAddress({
             </Button>
             <AlertDialogComponent
                 header=""
-                body={`This private address will only be valid for epoch ${epoch}`}
+                body={`This private address will only be expired at ${calcDate()}`}
                 button="I understand"
                 onClose={onClose}
                 isOpen={isOpen}

@@ -5,7 +5,7 @@ import { getUnirepContract } from '@unirep/contracts'
 import abi from '@anon-transfer/contracts/abi/AnonTransfer.json'
 import prover from '@unirep/circuits/provers/web'
 import { Circuit, SignupProof } from '@unirep/circuits'
-import { appAddress, chainId, culcEpoch, unirepAddress } from '@/contexts/User'
+import { appAddress, chainId, calcEpoch, unirepAddress } from '@/contexts/User'
 import { IndexedDBConnector } from 'anondb/web'
 
 export function useUnirepUser() {
@@ -29,7 +29,7 @@ export function useUnirepUser() {
         signer: JsonRpcSigner
     ): Promise<string> => {
         const app = new ethers.Contract(appAddress, abi, signer)
-        const epoch = culcEpoch()
+        const epoch = calcEpoch()
         const circuitInputs = {
             identity_secret: id.secret,
             epoch: epoch,
@@ -93,7 +93,7 @@ export function useUnirepUser() {
     ): Promise<string> => {
         const userState = await initUserState(id, signer)
         if (
-            culcEpoch() !==
+            calcEpoch() !==
             Number(window.localStorage.getItem('transitionEpoch'))
         ) {
             const unirep = getUnirepContract(unirepAddress, signer)
@@ -116,6 +116,7 @@ export function useUnirepUser() {
             )
             window.localStorage.setItem('transitionEpoch', toEpoch.toString())
             await signer.provider.waitForTransaction(tx)
+            await userState.waitForSync()
         }
         const revealNonce = true
         const epkNonce = 0

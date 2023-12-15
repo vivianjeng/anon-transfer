@@ -1,21 +1,16 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Button, Text, VStack, useDisclosure } from '@chakra-ui/react'
+import { Button, Text, useDisclosure } from '@chakra-ui/react'
 import { SettingsIcon } from '@chakra-ui/icons'
 import CopyAddress from './CopyAddress'
 import { genEpochKey } from '@unirep/utils'
 const { Identity } = require('@semaphore-protocol/identity')
-import prover from '@unirep/circuits/provers/web'
-import { UserState } from '@unirep/core'
-import { ethers } from 'ethers'
-import abi from '@unirep/contracts/abi/Unirep.json'
 import { JsonRpcSigner } from '@ethersproject/providers'
 import {
     appAddress,
     chainId,
-    unirepAddress,
     useGlobalContext,
-    culcEpoch,
+    calcEpoch,
 } from '@/contexts/User'
 import CardComponent from './Card'
 import Transaction from './Transaction'
@@ -46,7 +41,7 @@ export default function AddressList() {
                         genEpochKey(
                             id.secret,
                             appAddress,
-                            culcEpoch(),
+                            calcEpoch(),
                             i,
                             BigInt(chainId)
                         ).toString(16)
@@ -86,6 +81,7 @@ export default function AddressList() {
         typeof window !== 'undefined'
             ? window.localStorage.getItem('userId')
             : undefined,
+        epoch,
         isOpen,
     ])
 
@@ -101,10 +97,11 @@ export default function AddressList() {
                     address={address}
                     disabled={
                         typeof window !== 'undefined' &&
-                        epoch !==
+                        (epoch !==
                             Number(
                                 window.localStorage.getItem('transitionEpoch')
-                            )
+                            ) ||
+                            !signIn)
                     }
                     w="full"
                 />

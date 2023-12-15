@@ -107,20 +107,9 @@ export default function Withdraw() {
                     onClick={getData}
                     variant="outline"
                 ></IconButton>
-                <Box>Next epoch balance: {pending} wei</Box>
+                <Box>Next epoch balance: {pending} gwei</Box>
                 <Spacer />
-                <Box>Current epoch balance: {balance} wei</Box>
-                <Spacer />
-                <Box textColor="red">
-                    Max withdrawable wei: {MAX_VALUE} wei{' '}
-                    <Link
-                        textColor="currentcolor"
-                        isExternal
-                        href="https://github.com/vivianjeng/anon-transfer/issues/8"
-                    >
-                        (See issue#8)
-                    </Link>
-                </Box>
+                <Box>Current epoch balance: {balance} gwei</Box>
             </HStack>
             <HStack w="full">
                 <Text w="250px">Input an ETH address:</Text>
@@ -134,7 +123,7 @@ export default function Withdraw() {
                 />
             </HStack>
             <HStack w="full">
-                <Text w="250px">Input the amount of wei: </Text>
+                <Text w="250px">Input the amount of gwei: </Text>
                 <Input
                     value={value}
                     onChange={handleValueChange}

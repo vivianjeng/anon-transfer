@@ -94,6 +94,7 @@ export default function Signup({ ...props }: StackProps) {
             window.localStorage.setItem('email', email)
             window.localStorage.setItem('password', password)
             window.localStorage.setItem('userId', secret)
+            // TODO: set transtition epoch after signin
             setIsDisabled(true)
             setSignIn(true)
             setIsModalOpen(false)
