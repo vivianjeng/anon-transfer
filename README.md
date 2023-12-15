@@ -2,6 +2,10 @@
 
 This is a demo app of a [UniRep](https://github.com/Unirep/Unirep) application. Users of Anonymous Token Transfer can use the private address (called [epoch key](https://developer.unirep.io/docs/protocol/epoch-key) in UniRep) to receive tokens, and withdraw tokens with a different account. It doesn't require users to withdraw with the exact amount of the token when it is deposited.
 
+> [!CAUTION]
+> This is an experimental project.
+> Deposit ETH at your own risk. ⚠️
+
 Try it now 👉🏻 **https://anon-transfer.online/** 👈🏻
 
 **What is provided during withdrawal?**
