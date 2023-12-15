@@ -59,6 +59,7 @@ export default function AddressList() {
             const id = new Identity(window.localStorage.getItem('userId'))
             const tx = await userTransition(id, signer as JsonRpcSigner)
             setTxHash(tx)
+            onToggle()
         } catch (err: any) {
             window.alert(err.message)
         } finally {

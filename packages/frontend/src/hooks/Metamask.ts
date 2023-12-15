@@ -74,6 +74,7 @@ export function useMetamask() {
         )
         const network = await currentProvider.getNetwork()
         if (BigInt(network.chainId ?? 0) !== BigInt(chainId)) {
+            currentProvider = setupProvider()
             const params = [
                 {
                     chainId: chainId,

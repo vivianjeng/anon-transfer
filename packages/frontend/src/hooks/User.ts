@@ -63,7 +63,6 @@ export function useUnirepUser() {
     const userSignIn = async (id: any, signer: JsonRpcSigner) => {
         const userState = await initUserState(id, signer)
         const epoch = await userState.latestTransitionedEpoch()
-        console.log(epoch)
         window.localStorage.setItem('transitionEpoch', epoch.toString())
     }
 
