@@ -4,6 +4,17 @@ This is a demo app of a [UniRep](https://github.com/Unirep/Unirep) application. 
 
 Try it now 👉🏻 **https://anon-transfer.online/** 👈🏻
 
+**What is provided during withdrawal?**
+
+❌ User ID<br/>
+❌ Wallet address <br/>
+❌ Private address<br/>
+✅ Zero Knowledge Proof<br/>
+
+## Demo video
+
+[![Demo of Anon Transfer](https://img.youtube.com/vi/VzaWcboohhE/0.jpg)](https://www.youtube.com/watch?v=VzaWcboohhE)
+
 ## 1. Installation and build
 
 ```shell
