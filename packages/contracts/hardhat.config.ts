@@ -1,6 +1,7 @@
 import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
 import '@nomicfoundation/hardhat-chai-matchers'
+import '@nomicfoundation/hardhat-verify'
 
 export default {
     defaultNetwork: 'local',
@@ -29,5 +30,15 @@ export default {
                 },
             },
         ],
+    },
+    etherscan: {
+        // Your API key for Etherscan
+        // Obtain one at https://etherscan.io/
+        // apiKey:
+    },
+    sourcify: {
+        // Disabled by default
+        // Doesn't need an API key
+        enabled: true,
     },
 }

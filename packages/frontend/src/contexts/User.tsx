@@ -27,7 +27,7 @@ const GlobalContext = createContext<ContextProps>({
     setEpoch: (): number => 0,
 })
 
-export const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
+// export const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
 // testnet
 // export const chainId = '0x7a69'
 // export const appAddress = '0x0B306BF915C4d645ff596e518fAf3F9669b97016'
@@ -39,10 +39,16 @@ export const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
 // const startTimestamp = 1701792432
 // const epochLength = 300
 // v2
+// export const chainId = '0xaa36a7'
+// export const appAddress = '0x7b485d3a3De5009BfCB435D275594C86370079f4'
+// const startTimestamp = 1702536036
+// const epochLength = 600
+// v3
+export const unirepAddress = '0x83cB6AF63eAfEc7998cC601eC3f56d064892b386' //v2.0.0
 export const chainId = '0xaa36a7'
-export const appAddress = '0x7b485d3a3De5009BfCB435D275594C86370079f4'
-const startTimestamp = 1702536036
-const epochLength = 600
+export const appAddress = '0xF698A605fA60610ec44C41b67053435614E75Fc1'
+const startTimestamp = 1703051100
+const epochLength = 300
 
 export function calcEpoch() {
     const timestamp = Math.floor(+new Date() / 1000)

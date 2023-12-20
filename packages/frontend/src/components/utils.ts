@@ -11,7 +11,7 @@ export const searchUser = async (commitment: bigint) => {
             epoch
         }
     }`
-    const url = `https://api.studio.thegraph.com/query/48080/sepolia/v2.0.0-beta-5`
+    const url = `https://api.studio.thegraph.com/query/48080/sepolia/v2.0.0`
     const res = await fetch(url, {
         method: 'POST',
 
