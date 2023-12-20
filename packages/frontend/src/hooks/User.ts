@@ -1,4 +1,4 @@
-import { UserState, schema } from '@unirep/core'
+// import { UserState, schema } from '@unirep/core'
 import { ethers } from 'ethers'
 import { JsonRpcSigner } from '@ethersproject/providers'
 import { getUnirepContract } from '@unirep/contracts'
@@ -7,6 +7,8 @@ import prover from '@unirep/circuits/provers/web'
 import { Circuit, SignupProof } from '@unirep/circuits'
 import { appAddress, chainId, calcEpoch, unirepAddress } from '@/contexts/User'
 import { IndexedDBConnector } from 'anondb/web'
+import { schema } from './schema'
+import { UserState } from './UserState'
 
 export function useUnirepUser() {
     const initUserState = async (id: any, signer: JsonRpcSigner) => {
