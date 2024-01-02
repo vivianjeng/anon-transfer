@@ -29,9 +29,10 @@ const GlobalContext = createContext<ContextProps>({
 
 // export const unirepAddress = '0xD91ca7eAB8ac0e37681362271DEB11a7fc4e0d4f'
 // testnet
+// export const unirepAddress = '0x83cB6AF63eAfEc7998cC601eC3f56d064892b386'
 // export const chainId = '0x7a69'
-// export const appAddress = '0x0B306BF915C4d645ff596e518fAf3F9669b97016'
-// const startTimestamp = 1702604943
+// export const appAddress = '0x9A676e781A523b5d0C0e43731313A708CB607508'
+// const startTimestamp = 1703052981
 // const epochLength = 300
 // v1
 // export const chainId = '0xaa36a7'
