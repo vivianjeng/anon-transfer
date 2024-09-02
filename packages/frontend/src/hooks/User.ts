@@ -1,4 +1,4 @@
-// import { UserState, schema } from '@unirep/core'
+import { UserState, userSchema } from '@unirep/core'
 import { ethers } from 'ethers'
 import { JsonRpcSigner } from '@ethersproject/providers'
 import { getUnirepContract } from '@unirep/contracts'
@@ -7,12 +7,10 @@ import prover from '@unirep/circuits/provers/web'
 import { Circuit, SignupProof } from '@unirep/circuits'
 import { appAddress, chainId, calcEpoch, unirepAddress } from '@/contexts/User'
 import { IndexedDBConnector } from 'anondb/web'
-import { schema } from './schema'
-import { UserState } from './UserState'
 
 export function useUnirepUser() {
     const initUserState = async (id: any, signer: JsonRpcSigner) => {
-        const db = await IndexedDBConnector.create(schema)
+        const db = await IndexedDBConnector.create(userSchema)
         const state = new UserState({
             id: id,
             prover: prover,
@@ -157,7 +155,10 @@ export function useUnirepUser() {
     const getUserData = async (id: any, signer: JsonRpcSigner) => {
         const userState = await initUserState(id, signer)
         await userState.waitForSync()
+        const start = new Date().getTime()
         const data = await userState.getData()
+        const end = new Date().getTime()
+        console.log('getData time:', end - start, 'ms')
         const provable = await userState.getProvableData()
         const provableData = (provable[0] - provable[1]).toString()
         const latestData = (data[0] - data[1]).toString()
