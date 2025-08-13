@@ -6,7 +6,7 @@ This is a demo app of a [UniRep](https://github.com/Unirep/Unirep) application. 
 > This is an experimental project.
 > Deposit ETH at your own risk. ⚠️
 
-Try it now 👉🏻 **https://anon-transfer.online/** 👈🏻
+Try it now 👉🏻 **https://anon-transfer.pages.dev/** 👈🏻
 
 **What is provided during withdrawal?**
 
